@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/tamim1715/novaerp/internal/app"
+	"github.com/tamim1715/novaerp/internal/common/response"
 	"github.com/tamim1715/novaerp/internal/config"
-	"github.com/tamim1715/novaerp/internal/response"
 )
 
 type HealthHandler struct {

@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/tamim1715/novaerp/internal/app"
+	"github.com/tamim1715/novaerp/internal/common/middleware"
 	"github.com/tamim1715/novaerp/internal/config"
 	"github.com/tamim1715/novaerp/internal/database"
 	"github.com/tamim1715/novaerp/internal/logger"
@@ -34,6 +35,8 @@ func Bootstrap() (*gin.Engine, *app.Application) {
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	router.Use(middleware.RequestID())
 
 	// Register all routes
 	routes.RegisterRoutes(router, application)
