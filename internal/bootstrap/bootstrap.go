@@ -7,7 +7,9 @@ import (
 	"github.com/tamim1715/novaerp/internal/config"
 	"github.com/tamim1715/novaerp/internal/database"
 	"github.com/tamim1715/novaerp/internal/logger"
+	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/routes"
+	"go.uber.org/zap"
 )
 
 func Bootstrap() (*gin.Engine, *app.Application) {
@@ -26,6 +28,14 @@ func Bootstrap() (*gin.Engine, *app.Application) {
 		Config: &config.AppConfig,
 		DB:     database.DB,
 		Logger: log,
+	}
+
+	// Migrate the database for sync
+	if err := database.AutoMigrate(
+		application.DB,
+		&department.Department{},
+	); err != nil {
+		application.Logger.Fatal("failed to migrate database", zap.Error(err))
 	}
 
 	// Configure Gin
