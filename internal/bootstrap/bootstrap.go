@@ -8,6 +8,7 @@ import (
 	"github.com/tamim1715/novaerp/internal/database"
 	"github.com/tamim1715/novaerp/internal/logger"
 	"github.com/tamim1715/novaerp/internal/modules/department"
+	"github.com/tamim1715/novaerp/internal/modules/user"
 	"github.com/tamim1715/novaerp/internal/routes"
 	"go.uber.org/zap"
 )
@@ -34,6 +35,7 @@ func Bootstrap() (*gin.Engine, *app.Application) {
 	if err := database.AutoMigrate(
 		application.DB,
 		&department.Department{},
+		&user.User{},
 	); err != nil {
 		application.Logger.Fatal("failed to migrate database", zap.Error(err))
 	}

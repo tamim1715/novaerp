@@ -7,6 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
+func NewService(
+	repository Repository,
+	logger *zap.Logger,
+) Service {
+
+	return &service{
+		repository: repository,
+		logger:     logger,
+	}
+}
+
 type Service interface {
 	Create(CreateDepartmentRequest) (*Department, error)
 	FindAll() ([]Department, error)
@@ -74,15 +85,4 @@ func (s *service) Delete(id string) error {
 	}
 
 	return s.repository.Delete(id)
-}
-
-func NewService(
-	repository Repository,
-	logger *zap.Logger,
-) Service {
-
-	return &service{
-		repository: repository,
-		logger:     logger,
-	}
 }
