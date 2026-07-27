@@ -1,10 +1,13 @@
 package department
 
-import "gorm.io/gorm"
+import (
+	"github.com/tamim1715/novaerp/internal/common/pagination"
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	Create(*Department) error
-	FindAll() ([]Department, error)
+	FindAll(request pagination.PageRequest) ([]Department, int64, error)
 	FindByID(string) (*Department, error)
 	Update(*Department) error
 	Delete(string) error
@@ -24,13 +27,37 @@ func (r *repository) Create(department *Department) error {
 	return r.db.Create(department).Error
 }
 
-func (r *repository) FindAll() ([]Department, error) {
+func (r *repository) FindAll(
+	request pagination.PageRequest,
+) ([]Department, int64, error) {
+
+	request.Normalize()
 
 	var departments []Department
+	var total int64
 
-	err := r.db.Find(&departments).Error
+	query := r.db.Model(&Department{})
 
-	return departments, err
+	if request.Search != "" {
+
+		search := "%" + request.Search + "%"
+
+		query = query.Where(
+			"name ILIKE ? OR code ILIKE ?",
+			search,
+			search,
+		)
+	}
+
+	query.Count(&total)
+
+	err := query.
+		Order(request.SortBy + " " + request.Order).
+		Limit(request.Size).
+		Offset(request.Offset()).
+		Find(&departments).Error
+
+	return departments, total, err
 }
 
 func (r *repository) FindByID(id string) (*Department, error) {

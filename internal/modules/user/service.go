@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 
+	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -21,7 +22,7 @@ func NewService(
 
 type Service interface {
 	Create(request CreateUserRequest) (*User, error)
-	FindAll() ([]User, error)
+	FindAll(request pagination.PageRequest) ([]User, int64, error)
 	FindByID(string) (*User, error)
 	Update(string, UpdateUserRequest) (*User, error)
 	Delete(string) error
@@ -48,8 +49,8 @@ func (s *service) Create(req CreateUserRequest) (*User, error) {
 	return user, nil
 }
 
-func (s *service) FindAll() ([]User, error) {
-	return s.repository.FindAll()
+func (s *service) FindAll(request pagination.PageRequest) ([]User, int64, error) {
+	return s.repository.FindAll(request)
 }
 
 func (s *service) FindByID(id string) (*User, error) {

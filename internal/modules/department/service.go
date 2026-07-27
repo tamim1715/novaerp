@@ -3,6 +3,7 @@ package department
 import (
 	"errors"
 
+	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,7 @@ func NewService(
 
 type Service interface {
 	Create(CreateDepartmentRequest) (*Department, error)
-	FindAll() ([]Department, error)
+	FindAll(request pagination.PageRequest) ([]Department, int64, error)
 	FindByID(string) (*Department, error)
 	Update(string, UpdateDepartmentRequest) (*Department, error)
 	Delete(string) error
@@ -46,8 +47,8 @@ func (s *service) Create(req CreateDepartmentRequest) (*Department, error) {
 	return department, nil
 }
 
-func (s *service) FindAll() ([]Department, error) {
-	return s.repository.FindAll()
+func (s *service) FindAll(request pagination.PageRequest) ([]Department, int64, error) {
+	return s.repository.FindAll(request)
 }
 
 func (s *service) FindByID(id string) (*Department, error) {

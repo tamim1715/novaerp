@@ -1,12 +1,15 @@
 package user
 
-import "gorm.io/gorm"
+import (
+	"github.com/tamim1715/novaerp/internal/common/pagination"
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	Create(*User) error
 	Update(*User) error
 	Delete(string) error
-	FindAll() ([]User, error)
+	FindAll(request pagination.PageRequest) ([]User, int64, error)
 	FindByID(string) (*User, error)
 	FindByEmail(string) (*User, error)
 	FindByUsername(string) (*User, error)
@@ -32,10 +35,34 @@ func (r *repository) Delete(id string) error {
 	return r.db.Delete(&User{}, "id = ?", id).Error
 }
 
-func (r *repository) FindAll() ([]User, error) {
+func (r *repository) FindAll(request pagination.PageRequest) ([]User, int64, error) {
+	request.Normalize()
+
 	var users []User
-	err := r.db.Find(&users).Error
-	return users, err
+	var total int64
+
+	query := r.db.Model(&User{})
+
+	if request.Search != "" {
+
+		search := "%" + request.Search + "%"
+
+		query = query.Where(
+			"name ILIKE ? OR code ILIKE ?",
+			search,
+			search,
+		)
+	}
+
+	query.Count(&total)
+
+	err := query.
+		Order(request.SortBy + " " + request.Order).
+		Limit(request.Size).
+		Offset(request.Offset()).
+		Find(&users).Error
+
+	return users, total, err
 }
 
 func (r *repository) FindByID(id string) (*User, error) {

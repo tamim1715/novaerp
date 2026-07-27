@@ -1,9 +1,11 @@
 package department
 
 import (
+	"math"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"github.com/tamim1715/novaerp/internal/common/response"
 	"github.com/tamim1715/novaerp/internal/common/validator"
 )
@@ -48,17 +50,34 @@ func (h *Handler) Create(c *gin.Context) {
 
 func (h *Handler) FindAll(c *gin.Context) {
 
-	departments, err := h.service.FindAll()
+	var request pagination.PageRequest
+
+	if err := c.ShouldBindQuery(&request); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	departments, total, err := h.service.FindAll(request)
 
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	request.Normalize()
+
+	pageResponse := pagination.PageResponse{
+		Page:       request.Page,
+		Size:       request.Size,
+		TotalItems: total,
+		TotalPages: int(math.Ceil(float64(total) / float64(request.Size))),
+		Data:       ToResponses(departments),
+	}
+
 	response.Success(
 		c,
 		"Departments fetched successfully",
-		ToResponses(departments),
+		pageResponse,
 	)
 }
 
