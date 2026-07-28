@@ -15,5 +15,5 @@ Enterprise Resource Planning System
 ```bash
 go run cmd/server/main.go
 or
-air
+air -> if exists
 ```
