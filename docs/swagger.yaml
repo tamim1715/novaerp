@@ -1,0 +1,190 @@
+basePath: /api/v1
+definitions:
+  department.CreateDepartmentRequest:
+    properties:
+      code:
+        maxLength: 20
+        type: string
+      description:
+        type: string
+      name:
+        maxLength: 100
+        type: string
+    required:
+    - code
+    - name
+    type: object
+  department.UpdateDepartmentRequest:
+    properties:
+      code:
+        maxLength: 20
+        type: string
+      description:
+        type: string
+      name:
+        maxLength: 100
+        type: string
+    required:
+    - code
+    - name
+    type: object
+  response.APIResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Nova ERP REST API
+  title: Nova ERP API
+  version: "1.0"
+paths:
+  /departments:
+    get:
+      consumes:
+      - application/json
+      description: Get all departments
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Sort By
+        in: query
+        name: sortBy
+        type: string
+      - description: asc|desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Departments
+      tags:
+      - Department
+    post:
+      consumes:
+      - application/json
+      description: Create a new department
+      parameters:
+      - description: Department
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/department.CreateDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Create Department
+      tags:
+      - Department
+  /departments/{id}:
+    delete:
+      description: Soft delete department
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Delete Department
+      tags:
+      - Department
+    get:
+      description: Get department by ID
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Department
+      tags:
+      - Department
+    put:
+      consumes:
+      - application/json
+      description: Update department
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Department
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/department.UpdateDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Update Department
+      tags:
+      - Department
+swagger: "2.0"

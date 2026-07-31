@@ -4,13 +4,13 @@ import "github.com/gin-gonic/gin"
 
 func RegisterRoutes(router *gin.RouterGroup, handler *Handler) {
 
-	router.POST("", handler.Create)
+	router.POST("", handler.CreateDoc)
 
-	router.GET("", handler.FindAll)
+	router.GET("", handler.FindAllDoc)
 
-	router.GET("/:id", handler.FindByID)
+	router.GET("/:id", handler.FindByIDDoc)
 
-	router.PUT("/:id", handler.Update)
+	router.PUT("/:id", handler.UpdateDoc)
 
-	router.DELETE("/:id", handler.Delete)
+	router.DELETE("/:id", handler.DeleteDoc)
 }
