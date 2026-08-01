@@ -3,11 +3,14 @@ definitions:
   department.CreateDepartmentRequest:
     properties:
       code:
+        example: "1234"
         maxLength: 20
         type: string
       description:
+        example: This is a hr department
         type: string
       name:
+        example: hr
         maxLength: 100
         type: string
     required:
@@ -17,11 +20,14 @@ definitions:
   department.UpdateDepartmentRequest:
     properties:
       code:
+        example: "1234"
         maxLength: 20
         type: string
       description:
+        example: This is an new hr department
         type: string
       name:
+        example: hr
         maxLength: 100
         type: string
     required:

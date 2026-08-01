@@ -244,14 +244,17 @@ const docTemplate = `{
             "properties": {
                 "code": {
                     "type": "string",
-                    "maxLength": 20
+                    "maxLength": 20,
+                    "example": "1234"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "This is a hr department"
                 },
                 "name": {
                     "type": "string",
-                    "maxLength": 100
+                    "maxLength": 100,
+                    "example": "hr"
                 }
             }
         },
@@ -264,14 +267,17 @@ const docTemplate = `{
             "properties": {
                 "code": {
                     "type": "string",
-                    "maxLength": 20
+                    "maxLength": 20,
+                    "example": "1234"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "This is an new hr department"
                 },
                 "name": {
                     "type": "string",
-                    "maxLength": 100
+                    "maxLength": 100,
+                    "example": "hr"
                 }
             }
         },

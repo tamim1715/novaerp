@@ -1,15 +1,15 @@
 package department
 
 type CreateDepartmentRequest struct {
-	Name        string `json:"name" validate:"required,max=100"`
-	Code        string `json:"code" validate:"required,max=20"`
-	Description string `json:"description"`
+	Name        string `json:"name" validate:"required,max=100" example:"hr"`
+	Code        string `json:"code" validate:"required,max=20" example:"1234"`
+	Description string `json:"description" example:"This is a hr department"`
 }
 
 type UpdateDepartmentRequest struct {
-	Name        string `json:"name" validate:"required,max=100"`
-	Code        string `json:"code" validate:"required,max=20"`
-	Description string `json:"description"`
+	Name        string `json:"name" validate:"required,max=100" example:"hr"`
+	Code        string `json:"code" validate:"required,max=20" example:"1234"`
+	Description string `json:"description" example:"This is an new hr department"`
 }
 
 type DepartmentResponse struct {
