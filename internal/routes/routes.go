@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tamim1715/novaerp/internal/app"
 	"github.com/tamim1715/novaerp/internal/modules/department"
+	"github.com/tamim1715/novaerp/internal/modules/employee"
 	"github.com/tamim1715/novaerp/internal/modules/user"
 )
 
@@ -21,4 +22,8 @@ func RegisterRoutes(router *gin.Engine, application *app.Application) {
 	// User Module
 	userHandler := user.NewModule(application)
 	user.RegisterRoutes(api.Group("/users"), userHandler)
+
+	// Employee module
+	employeeHandler := employee.NewModule(application)
+	employee.RegisterRoutes(api.Group("/employees"), employeeHandler)
 }
