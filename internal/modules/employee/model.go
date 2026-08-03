@@ -3,7 +3,6 @@ package employee
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/tamim1715/novaerp/internal/common/model"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 )
@@ -11,7 +10,7 @@ import (
 type Employee struct {
 	model.BaseModel
 
-	DepartmentID uuid.UUID `gorm:"type:uuid;not null"`
+	DepartmentID string `gorm:"type:uuid;not null"`
 
 	FirstName string `gorm:"size:100;not null"`
 
@@ -23,11 +22,11 @@ type Employee struct {
 
 	Designation string `gorm:"size:100"`
 
-	JoiningDate time.Time
+	JoiningDate time.Time `gorm:"type:timestamp;not null"`
 
 	Salary float64 `gorm:"type:numeric(12,2)"`
 
-	Status bool `gorm:"default:true"`
+	Status string `gorm:"default:'active'"`
 
 	Department department.Department `gorm:"foreignKey:DepartmentID"`
 }

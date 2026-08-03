@@ -34,6 +34,71 @@ definitions:
     - code
     - name
     type: object
+  employee.CreateEmployeeRequest:
+    properties:
+      department_id:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+      designation:
+        example: assistant manager
+        type: string
+      email:
+        example: shahadat@gmail.com
+        type: string
+      firstName:
+        example: Shahadath Hossain
+        maxLength: 100
+        type: string
+      joiningDate:
+        example: "2006-01-02"
+        type: string
+      lastName:
+        example: Tamim
+        type: string
+      phone:
+        example: "123456"
+        type: string
+      salary:
+        example: 50000
+        type: number
+      status:
+        example: active
+        type: string
+    required:
+    - department_id
+    - email
+    - firstName
+    type: object
+  employee.UpdateEmployeeRequest:
+    properties:
+      department_id:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+      designation:
+        example: assistant manager
+        type: string
+      email:
+        example: shahadat@gmail.com
+        type: string
+      firstName:
+        example: Shahadath Hossain
+        type: string
+      joiningDate:
+        example: "2006-01-02"
+        type: string
+      lastName:
+        example: Tamim
+        type: string
+      phone:
+        example: "123456"
+        type: string
+      salary:
+        example: 50000
+        type: number
+      status:
+        example: active
+        type: string
+    type: object
   response.APIResponse:
     properties:
       data: {}
@@ -193,4 +258,148 @@ paths:
       summary: Update Department
       tags:
       - Department
+  /employees:
+    get:
+      consumes:
+      - application/json
+      description: Get all employees
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Sort By
+        in: query
+        name: sortBy
+        type: string
+      - description: asc|desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Employees
+      tags:
+      - Employee
+    post:
+      consumes:
+      - application/json
+      description: Create a new employee
+      parameters:
+      - description: Employee
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/employee.CreateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Create Employee
+      tags:
+      - Employee
+  /employees/{id}:
+    delete:
+      description: Soft delete employee
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Delete Employee
+      tags:
+      - Employee
+    get:
+      description: Get employee by ID
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Employee
+      tags:
+      - Employee
+    put:
+      consumes:
+      - application/json
+      description: Update employee
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Employee
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/employee.UpdateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Update Employee
+      tags:
+      - Employee
 swagger: "2.0"

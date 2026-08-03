@@ -35,15 +35,21 @@ type service struct {
 
 func (s *service) Create(req CreateEmployeeRequest) (*Employee, error) {
 
+	joinDate, err := time.Parse("2006-01-02", req.JoiningDate)
+	if err != nil {
+		return nil, err
+	}
+
 	employee := &Employee{
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
-		Email:       req.Email,
-		Phone:       req.Phone,
-		Designation: req.Designation,
-		JoiningDate: time.Unix(req.JoiningDate, 0),
-		Salary:      req.Salary,
-		Status:      req.Status,
+		FirstName:    req.FirstName,
+		LastName:     req.LastName,
+		DepartmentID: req.DepartmentID,
+		Email:        req.Email,
+		Phone:        req.Phone,
+		Designation:  req.Designation,
+		JoiningDate:  joinDate,
+		Salary:       req.Salary,
+		Status:       req.Status,
 	}
 
 	if err := s.repository.Create(employee); err != nil {
@@ -69,12 +75,18 @@ func (s *service) Update(id string, req UpdateEmployeeRequest) (*Employee, error
 		return nil, err
 	}
 
+	joinDate, err := time.Parse("2006-01-02", req.JoiningDate)
+	if err != nil {
+		return nil, err
+	}
+
+	employee.DepartmentID = req.DepartmentID
 	employee.FirstName = req.FirstName
 	employee.LastName = req.LastName
 	employee.Email = req.Email
 	employee.Phone = req.Phone
 	employee.Designation = req.Designation
-	employee.JoiningDate = time.Unix(req.JoiningDate, 0)
+	employee.JoiningDate = joinDate
 	employee.Salary = req.Salary
 	employee.Status = req.Status
 

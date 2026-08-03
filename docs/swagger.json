@@ -226,6 +226,224 @@
                     }
                 }
             }
+        },
+        "/employees": {
+            "get": {
+                "description": "Get all employees",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Get Employees",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort By",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "asc|desc",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new employee",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Create Employee",
+                "parameters": [
+                    {
+                        "description": "Employee",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/employee.CreateEmployeeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/employees/{id}": {
+            "get": {
+                "description": "Get employee by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Get Employee",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update employee",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Update Employee",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Employee",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/employee.UpdateEmployeeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Soft delete employee",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Delete Employee",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -272,6 +490,94 @@
                     "type": "string",
                     "maxLength": 100,
                     "example": "hr"
+                }
+            }
+        },
+        "employee.CreateEmployeeRequest": {
+            "type": "object",
+            "required": [
+                "department_id",
+                "email",
+                "firstName"
+            ],
+            "properties": {
+                "department_id": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                },
+                "designation": {
+                    "type": "string",
+                    "example": "assistant manager"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "shahadat@gmail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "Shahadath Hossain"
+                },
+                "joiningDate": {
+                    "type": "string",
+                    "example": "2006-01-02"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Tamim"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "123456"
+                },
+                "salary": {
+                    "type": "number",
+                    "example": 50000
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                }
+            }
+        },
+        "employee.UpdateEmployeeRequest": {
+            "type": "object",
+            "properties": {
+                "department_id": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                },
+                "designation": {
+                    "type": "string",
+                    "example": "assistant manager"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "shahadat@gmail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "Shahadath Hossain"
+                },
+                "joiningDate": {
+                    "type": "string",
+                    "example": "2006-01-02"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Tamim"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "123456"
+                },
+                "salary": {
+                    "type": "number",
+                    "example": 50000
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
                 }
             }
         },

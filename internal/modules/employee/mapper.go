@@ -3,8 +3,15 @@ package employee
 func ToResponse(employee *Employee) EmployeeResponse {
 	return EmployeeResponse{
 		ID:           employee.ID.String(),
+		FirstName:    employee.FirstName,
+		LastName:     employee.LastName,
+		Phone:        employee.Phone,
 		Email:        employee.Email,
-		DepartmentID: employee.DepartmentID.String(),
+		Designation:  employee.Designation,
+		JoiningDate:  employee.JoiningDate.String(),
+		Salary:       employee.Salary,
+		Status:       employee.Status,
+		DepartmentID: employee.DepartmentID,
 		CreatedAt:    employee.CreatedAt.Unix(),
 	}
 }
