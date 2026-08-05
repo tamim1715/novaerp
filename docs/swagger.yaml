@@ -1,5 +1,15 @@
 basePath: /api/v1
 definitions:
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
   department.CreateDepartmentRequest:
     properties:
       code:
@@ -99,6 +109,108 @@ definitions:
         example: active
         type: string
     type: object
+  inventory.AdjustStockRequest:
+    properties:
+      productId:
+        example: 8a393bbd-9790-4045-853e-26a2c732ee09
+        type: string
+      quantityDelta:
+        description: Positive to add, negative to reduce
+        example: 50
+        type: integer
+      warehouseId:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+    required:
+    - productId
+    - quantityDelta
+    - warehouseId
+    type: object
+  inventory.CreateProductRequest:
+    properties:
+      category:
+        example: Electronics
+        type: string
+      description:
+        example: High performance laptop
+        type: string
+      minStockLevel:
+        example: 5
+        type: integer
+      name:
+        example: Laptop Dell XPS 15
+        maxLength: 150
+        type: string
+      sku:
+        example: PRD-1001
+        maxLength: 50
+        type: string
+      unit:
+        example: pcs
+        type: string
+      unitPrice:
+        example: 1499.99
+        type: number
+    required:
+    - name
+    - sku
+    type: object
+  inventory.CreateWarehouseRequest:
+    properties:
+      code:
+        example: WH-001
+        maxLength: 30
+        type: string
+      location:
+        example: Building A, Industrial Area
+        type: string
+      name:
+        example: Main Warehouse
+        maxLength: 100
+        type: string
+    required:
+    - code
+    - name
+    type: object
+  inventory.UpdateProductRequest:
+    properties:
+      category:
+        example: Electronics
+        type: string
+      description:
+        example: High performance laptop
+        type: string
+      minStockLevel:
+        example: 5
+        type: integer
+      name:
+        example: Laptop Dell XPS 15
+        type: string
+      sku:
+        example: PRD-1001
+        type: string
+      unit:
+        example: pcs
+        type: string
+      unitPrice:
+        example: 1499.99
+        type: number
+    type: object
+  inventory.UpdateWarehouseRequest:
+    properties:
+      code:
+        example: WH-001
+        type: string
+      isActive:
+        example: true
+        type: boolean
+      location:
+        example: Building A, Industrial Area
+        type: string
+      name:
+        example: Main Warehouse Updated
+        type: string
+    type: object
   response.APIResponse:
     properties:
       data: {}
@@ -107,6 +219,31 @@ definitions:
       success:
         type: boolean
     type: object
+  user.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  user.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      isActive:
+        type: boolean
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -114,6 +251,36 @@ info:
   title: Nova ERP API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT bearer token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: User Login
+      tags:
+      - Auth
   /departments:
     get:
       consumes:
@@ -402,4 +569,486 @@ paths:
       summary: Update Employee
       tags:
       - Employee
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated product catalog
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Sort By
+        in: query
+        name: sortBy
+        type: string
+      - description: asc|desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Products
+      tags:
+      - Inventory - Products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product item in catalog
+      parameters:
+      - description: Product
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inventory.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Create Product
+      tags:
+      - Inventory - Products
+  /products/{id}:
+    delete:
+      description: Delete product item
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Delete Product
+      tags:
+      - Inventory - Products
+    get:
+      description: Get product details by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Product
+      tags:
+      - Inventory - Products
+    put:
+      consumes:
+      - application/json
+      description: Update product details
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inventory.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Update Product
+      tags:
+      - Inventory - Products
+  /stocks:
+    get:
+      consumes:
+      - application/json
+      description: Get stock balances across warehouses
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Stocks
+      tags:
+      - Inventory - Stocks
+  /stocks/adjust:
+    post:
+      consumes:
+      - application/json
+      description: Adjust quantity of a product in a warehouse
+      parameters:
+      - description: Stock Adjustment
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inventory.AdjustStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Adjust Stock
+      tags:
+      - Inventory - Stocks
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of users
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Sort By
+        in: query
+        name: sortBy
+        type: string
+      - description: asc|desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Users
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: User
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Create User
+      tags:
+      - User
+  /users/{id}:
+    delete:
+      description: Soft delete user account
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Delete User
+      tags:
+      - User
+    get:
+      description: Get user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get User
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update user details
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Update User
+      tags:
+      - User
+  /warehouses:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of warehouses
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Sort By
+        in: query
+        name: sortBy
+        type: string
+      - description: asc|desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Warehouses
+      tags:
+      - Inventory - Warehouses
+    post:
+      consumes:
+      - application/json
+      description: Create a new warehouse location
+      parameters:
+      - description: Warehouse
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inventory.CreateWarehouseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Create Warehouse
+      tags:
+      - Inventory - Warehouses
+  /warehouses/{id}:
+    delete:
+      description: Delete warehouse
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Delete Warehouse
+      tags:
+      - Inventory - Warehouses
+    get:
+      description: Get warehouse by ID
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get Warehouse
+      tags:
+      - Inventory - Warehouses
+    put:
+      consumes:
+      - application/json
+      description: Update warehouse details
+      parameters:
+      - description: Warehouse ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Warehouse
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inventory.UpdateWarehouseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Update Warehouse
+      tags:
+      - Inventory - Warehouses
 swagger: "2.0"
