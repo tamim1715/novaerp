@@ -2,10 +2,13 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"gorm.io/gorm"
 )
+
+var ErrNilDB = errors.New("database connection is not initialized")
 
 type Repository interface {
 	Create(ctx context.Context, user *User) error
@@ -26,18 +29,30 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 func (r *repository) Create(ctx context.Context, user *User) error {
+	if r == nil || r.db == nil {
+		return ErrNilDB
+	}
 	return r.db.WithContext(ctx).Create(user).Error
 }
 
 func (r *repository) Update(ctx context.Context, user *User) error {
+	if r == nil || r.db == nil {
+		return ErrNilDB
+	}
 	return r.db.WithContext(ctx).Save(user).Error
 }
 
 func (r *repository) Delete(ctx context.Context, id string) error {
+	if r == nil || r.db == nil {
+		return ErrNilDB
+	}
 	return r.db.WithContext(ctx).Delete(&User{}, "id = ?", id).Error
 }
 
 func (r *repository) FindAll(ctx context.Context, request pagination.PageRequest) ([]User, int64, error) {
+	if r == nil || r.db == nil {
+		return nil, 0, ErrNilDB
+	}
 	request.Normalize()
 
 	var users []User
@@ -66,6 +81,9 @@ func (r *repository) FindAll(ctx context.Context, request pagination.PageRequest
 }
 
 func (r *repository) FindByID(ctx context.Context, id string) (*User, error) {
+	if r == nil || r.db == nil {
+		return nil, ErrNilDB
+	}
 	var user User
 	if err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
 		return nil, err
@@ -74,6 +92,9 @@ func (r *repository) FindByID(ctx context.Context, id string) (*User, error) {
 }
 
 func (r *repository) FindByEmail(ctx context.Context, email string) (*User, error) {
+	if r == nil || r.db == nil {
+		return nil, ErrNilDB
+	}
 	var user User
 	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
 		return nil, err
@@ -82,6 +103,9 @@ func (r *repository) FindByEmail(ctx context.Context, email string) (*User, erro
 }
 
 func (r *repository) FindByUsername(ctx context.Context, username string) (*User, error) {
+	if r == nil || r.db == nil {
+		return nil, ErrNilDB
+	}
 	var user User
 	if err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error; err != nil {
 		return nil, err

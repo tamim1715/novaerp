@@ -2,10 +2,13 @@ package department
 
 import (
 	"context"
+	"errors"
 
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"gorm.io/gorm"
 )
+
+var ErrNilDB = errors.New("database connection is not initialized")
 
 type Repository interface {
 	Create(ctx context.Context, department *Department) error
@@ -26,6 +29,9 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 func (r *repository) Create(ctx context.Context, department *Department) error {
+	if r == nil || r.db == nil {
+		return ErrNilDB
+	}
 	return r.db.WithContext(ctx).Create(department).Error
 }
 
@@ -33,6 +39,9 @@ func (r *repository) FindAll(
 	ctx context.Context,
 	request pagination.PageRequest,
 ) ([]Department, int64, error) {
+	if r == nil || r.db == nil {
+		return nil, 0, ErrNilDB
+	}
 
 	request.Normalize()
 
@@ -64,6 +73,9 @@ func (r *repository) FindAll(
 }
 
 func (r *repository) FindByID(ctx context.Context, id string) (*Department, error) {
+	if r == nil || r.db == nil {
+		return nil, ErrNilDB
+	}
 
 	var department Department
 
@@ -77,9 +89,15 @@ func (r *repository) FindByID(ctx context.Context, id string) (*Department, erro
 }
 
 func (r *repository) Update(ctx context.Context, department *Department) error {
+	if r == nil || r.db == nil {
+		return ErrNilDB
+	}
 	return r.db.WithContext(ctx).Save(department).Error
 }
 
 func (r *repository) Delete(ctx context.Context, id string) error {
+	if r == nil || r.db == nil {
+		return ErrNilDB
+	}
 	return r.db.WithContext(ctx).Delete(&Department{}, "id = ?", id).Error
 }

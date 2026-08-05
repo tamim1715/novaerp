@@ -32,7 +32,8 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 	// Connect database
 	db, err := database.Connect(cfg)
 	if err != nil {
-		log.Warn("database connection error (verify PostgreSQL is running)", zap.Error(err))
+		log.Error("database connection error", zap.Error(err))
+		return nil, nil, fmt.Errorf("database connection failed: %w", err)
 	}
 
 	// Create application context
@@ -42,17 +43,15 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 		Logger: log,
 	}
 
-	// Migrate the database if DB connection is active
-	if db != nil {
-		if err := database.AutoMigrate(
-			application.DB,
-			&department.Department{},
-			&user.User{},
-			&employee.Employee{},
-		); err != nil {
-			log.Error("failed to migrate database", zap.Error(err))
-			return nil, nil, fmt.Errorf("database migration failed: %w", err)
-		}
+	// Migrate the database
+	if err := database.AutoMigrate(
+		application.DB,
+		&department.Department{},
+		&user.User{},
+		&employee.Employee{},
+	); err != nil {
+		log.Error("failed to migrate database", zap.Error(err))
+		return nil, nil, fmt.Errorf("database migration failed: %w", err)
 	}
 
 	// Configure Gin
