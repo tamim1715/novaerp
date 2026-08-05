@@ -1,6 +1,9 @@
+// Package bootstrap initializes application dependencies, database migrations, and routing.
 package bootstrap
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/tamim1715/novaerp/internal/app"
 	"github.com/tamim1715/novaerp/internal/common/middleware"
@@ -14,32 +17,42 @@ import (
 	"go.uber.org/zap"
 )
 
-func Bootstrap() (*gin.Engine, *app.Application) {
+// Bootstrap loads configuration, sets up logging, connects to the database, runs migrations, and configures Gin routes.
+func Bootstrap() (*gin.Engine, *app.Application, error) {
 
 	// Load environment
-	config.LoadEnv()
+	cfg := config.LoadEnv()
 
 	// Initialize logger
-	log := logger.NewLogger()
+	log, err := logger.NewLogger()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize logger: %w", err)
+	}
 
 	// Connect database
-	database.Connect()
+	db, err := database.Connect(cfg)
+	if err != nil {
+		log.Warn("database connection error (verify PostgreSQL is running)", zap.Error(err))
+	}
 
 	// Create application context
 	application := &app.Application{
-		Config: &config.AppConfig,
-		DB:     database.DB,
+		Config: cfg,
+		DB:     db,
 		Logger: log,
 	}
 
-	// Migrate the database for sync
-	if err := database.AutoMigrate(
-		application.DB,
-		&department.Department{},
-		&user.User{},
-		&employee.Employee{},
-	); err != nil {
-		application.Logger.Fatal("failed to migrate database", zap.Error(err))
+	// Migrate the database if DB connection is active
+	if db != nil {
+		if err := database.AutoMigrate(
+			application.DB,
+			&department.Department{},
+			&user.User{},
+			&employee.Employee{},
+		); err != nil {
+			log.Error("failed to migrate database", zap.Error(err))
+			return nil, nil, fmt.Errorf("database migration failed: %w", err)
+		}
 	}
 
 	// Configure Gin
@@ -55,5 +68,5 @@ func Bootstrap() (*gin.Engine, *app.Application) {
 	// Register all routes
 	routes.RegisterRoutes(router, application)
 
-	return router, application
+	return router, application, nil
 }

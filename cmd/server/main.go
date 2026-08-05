@@ -7,33 +7,69 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	_ "github.com/swaggo/files"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/tamim1715/novaerp/docs"
 	"github.com/tamim1715/novaerp/internal/bootstrap"
+	"go.uber.org/zap"
 )
 
 func main() {
-
-	router, application := bootstrap.Bootstrap()
+	router, application, err := bootstrap.Bootstrap()
+	if err != nil {
+		log.Fatalf("failed to bootstrap application: %v", err)
+	}
 
 	defer application.Logger.Sync()
 
-	log.Printf("%s started on port %s",
-		application.Config.AppName,
-		application.Config.Port,
-	)
-
-	// 2. REGISTER THE SWAGGER ROUTE
+	// Register Swagger route
 	router.GET(
 		"/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
 	)
 
-	if err := router.Run(":" + application.Config.Port); err != nil {
-		log.Fatal(err)
+	serverAddr := ":" + application.Config.Port
+	srv := &http.Server{
+		Addr:         serverAddr,
+		Handler:      router,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	// Start HTTP server in a separate goroutine
+	go func() {
+		application.Logger.Info("server starting",
+			zap.String("app", application.Config.AppName),
+			zap.String("port", application.Config.Port),
+		)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			application.Logger.Fatal("server error", zap.Error(err))
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shut down the server with a timeout of 10 seconds.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	application.Logger.Info("shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		application.Logger.Error("server forced to shutdown", zap.Error(err))
+	} else {
+		application.Logger.Info("server exited gracefully")
 	}
 }

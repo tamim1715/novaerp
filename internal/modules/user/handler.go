@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"math"
 	"net/http"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"github.com/tamim1715/novaerp/internal/common/response"
 	"github.com/tamim1715/novaerp/internal/common/validator"
+	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -34,7 +36,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.Create(request)
+	user, err := h.service.Create(c.Request.Context(), request)
 
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
@@ -57,7 +59,7 @@ func (h *Handler) FindAll(c *gin.Context) {
 		return
 	}
 
-	users, total, err := h.service.FindAll(request)
+	users, total, err := h.service.FindAll(c.Request.Context(), request)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -84,10 +86,14 @@ func (h *Handler) FindByID(c *gin.Context) {
 
 	id := c.Param("id")
 
-	user, err := h.service.FindByID(id)
+	user, err := h.service.FindByID(c.Request.Context(), id)
 
 	if err != nil {
-		response.Error(c, http.StatusNotFound, err.Error())
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Error(c, http.StatusNotFound, "User not found")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -114,9 +120,13 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.Update(id, request)
+	user, err := h.service.Update(c.Request.Context(), id, request)
 
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Error(c, http.StatusNotFound, "User not found")
+			return
+		}
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -132,7 +142,11 @@ func (h *Handler) Delete(c *gin.Context) {
 
 	id := c.Param("id")
 
-	if err := h.service.Delete(id); err != nil {
+	if err := h.service.Delete(c.Request.Context(), id); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Error(c, http.StatusNotFound, "User not found")
+			return
+		}
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}

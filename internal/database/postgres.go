@@ -1,8 +1,9 @@
+// Package database handles PostgreSQL connection and database migration.
 package database
 
 import (
 	"fmt"
-	"log"
+	"time"
 
 	"github.com/tamim1715/novaerp/internal/config"
 	"gorm.io/driver/postgres"
@@ -11,23 +12,33 @@ import (
 
 var DB *gorm.DB
 
-func Connect() {
+// Connect establishes a connection to PostgreSQL using provided config and configures the connection pool.
+func Connect(cfg *config.Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		config.AppConfig.DBHost,
-		config.AppConfig.DBUser,
-		config.AppConfig.DBPassword,
-		config.AppConfig.DBName,
-		config.AppConfig.DBPort,
+		cfg.DBHost,
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBName,
+		cfg.DBPort,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
 	if err != nil {
-		log.Fatal("Database connection failed:", err)
+		return nil, fmt.Errorf("database connection failed: %w", err)
 	}
 
-	DB = db
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
+	}
 
-	log.Println("PostgreSQL connected successfully")
+	// Configure connection pool settings for production robustness
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(1 * time.Hour)
+	sqlDB.SetConnMaxIdleTime(30 * time.Minute)
+
+	DB = db
+	return db, nil
 }

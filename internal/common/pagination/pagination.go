@@ -1,4 +1,9 @@
+// Package pagination provides helpers for handling list pagination requests and responses.
 package pagination
+
+import "regexp"
+
+var safeSortRegex = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
 
 type PageRequest struct {
 	Page   int    `form:"page"`
@@ -29,7 +34,8 @@ func (p *PageRequest) Normalize() {
 		p.Size = 100
 	}
 
-	if p.SortBy == "" {
+	// Ensure SortBy contains only valid identifier characters to prevent SQL injection
+	if p.SortBy == "" || !safeSortRegex.MatchString(p.SortBy) {
 		p.SortBy = "created_at"
 	}
 

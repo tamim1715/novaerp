@@ -1,7 +1,9 @@
 package user
 
 import (
+	"context"
 	"errors"
+	"fmt"
 
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"go.uber.org/zap"
@@ -21,11 +23,11 @@ func NewService(
 }
 
 type Service interface {
-	Create(request CreateUserRequest) (*User, error)
-	FindAll(request pagination.PageRequest) ([]User, int64, error)
-	FindByID(string) (*User, error)
-	Update(string, UpdateUserRequest) (*User, error)
-	Delete(string) error
+	Create(ctx context.Context, request CreateUserRequest) (*User, error)
+	FindAll(ctx context.Context, request pagination.PageRequest) ([]User, int64, error)
+	FindByID(ctx context.Context, id string) (*User, error)
+	Update(ctx context.Context, id string, req UpdateUserRequest) (*User, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type service struct {
@@ -33,33 +35,38 @@ type service struct {
 	logger     *zap.Logger
 }
 
-func (s *service) Create(req CreateUserRequest) (*User, error) {
+func (s *service) Create(ctx context.Context, req CreateUserRequest) (*User, error) {
+
+	hashedPassword, err := hashPassword(req.Password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash password: %w", err)
+	}
 
 	user := &User{
 		Username: req.Username,
 		Email:    req.Email,
-		Password: hashPassword(req.Password),
+		Password: hashedPassword,
 		IsActive: true,
 	}
 
-	if err := s.repository.Create(user); err != nil {
+	if err := s.repository.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
 	return user, nil
 }
 
-func (s *service) FindAll(request pagination.PageRequest) ([]User, int64, error) {
-	return s.repository.FindAll(request)
+func (s *service) FindAll(ctx context.Context, request pagination.PageRequest) ([]User, int64, error) {
+	return s.repository.FindAll(ctx, request)
 }
 
-func (s *service) FindByID(id string) (*User, error) {
-	return s.repository.FindByID(id)
+func (s *service) FindByID(ctx context.Context, id string) (*User, error) {
+	return s.repository.FindByID(ctx, id)
 }
 
-func (s *service) Update(id string, req UpdateUserRequest) (*User, error) {
+func (s *service) Update(ctx context.Context, id string, req UpdateUserRequest) (*User, error) {
 
-	user, err := s.repository.FindByID(id)
+	user, err := s.repository.FindByID(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -75,16 +82,16 @@ func (s *service) Update(id string, req UpdateUserRequest) (*User, error) {
 		user.IsActive = *req.IsActive
 	}
 
-	if err := s.repository.Update(user); err != nil {
+	if err := s.repository.Update(ctx, user); err != nil {
 		return nil, err
 	}
 
 	return user, nil
 }
 
-func (s *service) Delete(id string) error {
+func (s *service) Delete(ctx context.Context, id string) error {
 
-	_, err := s.repository.FindByID(id)
+	_, err := s.repository.FindByID(ctx, id)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -93,16 +100,16 @@ func (s *service) Delete(id string) error {
 		return err
 	}
 
-	return s.repository.Delete(id)
+	return s.repository.Delete(ctx, id)
 }
 
-func hashPassword(password string) string {
+func hashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword(
 		[]byte(password),
 		bcrypt.DefaultCost,
 	)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return string(hashedPassword)
+	return string(hashedPassword), nil
 }

@@ -1,18 +1,20 @@
 package user
 
 import (
+	"context"
+
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	Create(*User) error
-	Update(*User) error
-	Delete(string) error
-	FindAll(request pagination.PageRequest) ([]User, int64, error)
-	FindByID(string) (*User, error)
-	FindByEmail(string) (*User, error)
-	FindByUsername(string) (*User, error)
+	Create(ctx context.Context, user *User) error
+	Update(ctx context.Context, user *User) error
+	Delete(ctx context.Context, id string) error
+	FindAll(ctx context.Context, request pagination.PageRequest) ([]User, int64, error)
+	FindByID(ctx context.Context, id string) (*User, error)
+	FindByEmail(ctx context.Context, email string) (*User, error)
+	FindByUsername(ctx context.Context, username string) (*User, error)
 }
 
 type repository struct {
@@ -23,32 +25,30 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) Create(user *User) error {
-	return r.db.Create(user).Error
+func (r *repository) Create(ctx context.Context, user *User) error {
+	return r.db.WithContext(ctx).Create(user).Error
 }
 
-func (r *repository) Update(user *User) error {
-	return r.db.Save(user).Error
+func (r *repository) Update(ctx context.Context, user *User) error {
+	return r.db.WithContext(ctx).Save(user).Error
 }
 
-func (r *repository) Delete(id string) error {
-	return r.db.Delete(&User{}, "id = ?", id).Error
+func (r *repository) Delete(ctx context.Context, id string) error {
+	return r.db.WithContext(ctx).Delete(&User{}, "id = ?", id).Error
 }
 
-func (r *repository) FindAll(request pagination.PageRequest) ([]User, int64, error) {
+func (r *repository) FindAll(ctx context.Context, request pagination.PageRequest) ([]User, int64, error) {
 	request.Normalize()
 
 	var users []User
 	var total int64
 
-	query := r.db.Model(&User{})
+	query := r.db.WithContext(ctx).Model(&User{})
 
 	if request.Search != "" {
-
 		search := "%" + request.Search + "%"
-
 		query = query.Where(
-			"name ILIKE ? OR code ILIKE ?",
+			"username ILIKE ? OR email ILIKE ?",
 			search,
 			search,
 		)
@@ -65,25 +65,25 @@ func (r *repository) FindAll(request pagination.PageRequest) ([]User, int64, err
 	return users, total, err
 }
 
-func (r *repository) FindByID(id string) (*User, error) {
+func (r *repository) FindByID(ctx context.Context, id string) (*User, error) {
 	var user User
-	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *repository) FindByEmail(email string) (*User, error) {
+func (r *repository) FindByEmail(ctx context.Context, email string) (*User, error) {
 	var user User
-	if err := r.db.First(&user, "email = ?", email).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *repository) FindByUsername(username string) (*User, error) {
+func (r *repository) FindByUsername(ctx context.Context, username string) (*User, error) {
 	var user User
-	if err := r.db.First(&user, "username = ?", username).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

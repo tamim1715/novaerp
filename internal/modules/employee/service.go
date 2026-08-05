@@ -1,6 +1,7 @@
 package employee
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -21,11 +22,11 @@ func NewService(
 }
 
 type Service interface {
-	Create(CreateEmployeeRequest) (*Employee, error)
-	FindAll(request pagination.PageRequest) ([]Employee, int64, error)
-	FindByID(string) (*Employee, error)
-	Update(string, UpdateEmployeeRequest) (*Employee, error)
-	Delete(string) error
+	Create(ctx context.Context, request CreateEmployeeRequest) (*Employee, error)
+	FindAll(ctx context.Context, request pagination.PageRequest) ([]Employee, int64, error)
+	FindByID(ctx context.Context, id string) (*Employee, error)
+	Update(ctx context.Context, id string, request UpdateEmployeeRequest) (*Employee, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type service struct {
@@ -33,11 +34,22 @@ type service struct {
 	logger     *zap.Logger
 }
 
-func (s *service) Create(req CreateEmployeeRequest) (*Employee, error) {
+func (s *service) Create(ctx context.Context, req CreateEmployeeRequest) (*Employee, error) {
 
-	joinDate, err := time.Parse("2006-01-02", req.JoiningDate)
-	if err != nil {
-		return nil, err
+	var joinDate time.Time
+	var err error
+
+	if req.JoiningDate != "" {
+		joinDate, err = time.Parse("2006-01-02", req.JoiningDate)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		joinDate = time.Now()
+	}
+
+	if req.Status == "" {
+		req.Status = "active"
 	}
 
 	employee := &Employee{
@@ -52,54 +64,72 @@ func (s *service) Create(req CreateEmployeeRequest) (*Employee, error) {
 		Status:       req.Status,
 	}
 
-	if err := s.repository.Create(employee); err != nil {
+	if err := s.repository.Create(ctx, employee); err != nil {
 		return nil, err
 	}
 
-	return employee, nil
+	return s.repository.FindByID(ctx, employee.ID.String())
 }
 
-func (s *service) FindAll(request pagination.PageRequest) ([]Employee, int64, error) {
-	return s.repository.FindAll(request)
+func (s *service) FindAll(ctx context.Context, request pagination.PageRequest) ([]Employee, int64, error) {
+	return s.repository.FindAll(ctx, request)
 }
 
-func (s *service) FindByID(id string) (*Employee, error) {
-	return s.repository.FindByID(id)
+func (s *service) FindByID(ctx context.Context, id string) (*Employee, error) {
+	return s.repository.FindByID(ctx, id)
 }
 
-func (s *service) Update(id string, req UpdateEmployeeRequest) (*Employee, error) {
+func (s *service) Update(ctx context.Context, id string, req UpdateEmployeeRequest) (*Employee, error) {
 
-	employee, err := s.repository.FindByID(id)
+	employee, err := s.repository.FindByID(ctx, id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	joinDate, err := time.Parse("2006-01-02", req.JoiningDate)
-	if err != nil {
+	if req.JoiningDate != "" {
+		joinDate, err := time.Parse("2006-01-02", req.JoiningDate)
+		if err != nil {
+			return nil, err
+		}
+		employee.JoiningDate = joinDate
+	}
+
+	if req.DepartmentID != "" {
+		employee.DepartmentID = req.DepartmentID
+	}
+	if req.FirstName != "" {
+		employee.FirstName = req.FirstName
+	}
+	if req.LastName != "" {
+		employee.LastName = req.LastName
+	}
+	if req.Email != "" {
+		employee.Email = req.Email
+	}
+	if req.Phone != "" {
+		employee.Phone = req.Phone
+	}
+	if req.Designation != "" {
+		employee.Designation = req.Designation
+	}
+	if req.Salary != 0 {
+		employee.Salary = req.Salary
+	}
+	if req.Status != "" {
+		employee.Status = req.Status
+	}
+
+	if err := s.repository.Update(ctx, employee); err != nil {
 		return nil, err
 	}
 
-	employee.DepartmentID = req.DepartmentID
-	employee.FirstName = req.FirstName
-	employee.LastName = req.LastName
-	employee.Email = req.Email
-	employee.Phone = req.Phone
-	employee.Designation = req.Designation
-	employee.JoiningDate = joinDate
-	employee.Salary = req.Salary
-	employee.Status = req.Status
-
-	if err := s.repository.Update(employee); err != nil {
-		return nil, err
-	}
-
-	return employee, nil
+	return s.repository.FindByID(ctx, employee.ID.String())
 }
 
-func (s *service) Delete(id string) error {
+func (s *service) Delete(ctx context.Context, id string) error {
 
-	_, err := s.repository.FindByID(id)
+	_, err := s.repository.FindByID(ctx, id)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -108,5 +138,5 @@ func (s *service) Delete(id string) error {
 		return err
 	}
 
-	return s.repository.Delete(id)
+	return s.repository.Delete(ctx, id)
 }

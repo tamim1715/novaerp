@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/tamim1715/novaerp/internal/app"
+	"github.com/tamim1715/novaerp/internal/modules/auth"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
 	"github.com/tamim1715/novaerp/internal/modules/user"
@@ -14,6 +15,10 @@ func RegisterRoutes(router *gin.Engine, application *app.Application) {
 
 	// Health Route
 	RegisterHealthRoutes(router, application)
+
+	// Auth Module
+	authHandler := auth.NewModule(application)
+	auth.RegisterRoutes(api.Group("/auth"), authHandler)
 
 	// Department Module
 	departmentHandler := department.NewModule(application)

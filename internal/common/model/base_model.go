@@ -1,3 +1,4 @@
+// Package model defines base models shared across domain entities.
 package model
 
 import (
@@ -7,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// BaseModel provides common fields for GORM entities.
 type BaseModel struct {
 	ID        uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
 	CreatedAt time.Time      `json:"createdAt"`
@@ -14,7 +16,10 @@ type BaseModel struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+// BeforeCreate hooks into GORM's creation process to ensure a valid UUID is assigned.
 func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
-	b.ID = uuid.New()
+	if b.ID == uuid.Nil {
+		b.ID = uuid.New()
+	}
 	return nil
 }

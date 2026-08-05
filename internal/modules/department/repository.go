@@ -1,16 +1,18 @@
 package department
 
 import (
+	"context"
+
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	Create(*Department) error
-	FindAll(request pagination.PageRequest) ([]Department, int64, error)
-	FindByID(string) (*Department, error)
-	Update(*Department) error
-	Delete(string) error
+	Create(ctx context.Context, department *Department) error
+	FindAll(ctx context.Context, request pagination.PageRequest) ([]Department, int64, error)
+	FindByID(ctx context.Context, id string) (*Department, error)
+	Update(ctx context.Context, department *Department) error
+	Delete(ctx context.Context, id string) error
 }
 
 type repository struct {
@@ -23,11 +25,12 @@ func NewRepository(db *gorm.DB) Repository {
 	}
 }
 
-func (r *repository) Create(department *Department) error {
-	return r.db.Create(department).Error
+func (r *repository) Create(ctx context.Context, department *Department) error {
+	return r.db.WithContext(ctx).Create(department).Error
 }
 
 func (r *repository) FindAll(
+	ctx context.Context,
 	request pagination.PageRequest,
 ) ([]Department, int64, error) {
 
@@ -36,7 +39,7 @@ func (r *repository) FindAll(
 	var departments []Department
 	var total int64
 
-	query := r.db.Model(&Department{})
+	query := r.db.WithContext(ctx).Model(&Department{})
 
 	if request.Search != "" {
 
@@ -60,11 +63,11 @@ func (r *repository) FindAll(
 	return departments, total, err
 }
 
-func (r *repository) FindByID(id string) (*Department, error) {
+func (r *repository) FindByID(ctx context.Context, id string) (*Department, error) {
 
 	var department Department
 
-	err := r.db.First(&department, "id = ?", id).Error
+	err := r.db.WithContext(ctx).First(&department, "id = ?", id).Error
 
 	if err != nil {
 		return nil, err
@@ -73,10 +76,10 @@ func (r *repository) FindByID(id string) (*Department, error) {
 	return &department, nil
 }
 
-func (r *repository) Update(department *Department) error {
-	return r.db.Save(department).Error
+func (r *repository) Update(ctx context.Context, department *Department) error {
+	return r.db.WithContext(ctx).Save(department).Error
 }
 
-func (r *repository) Delete(id string) error {
-	return r.db.Delete(&Department{}, "id = ?", id).Error
+func (r *repository) Delete(ctx context.Context, id string) error {
+	return r.db.WithContext(ctx).Delete(&Department{}, "id = ?", id).Error
 }

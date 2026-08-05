@@ -1,3 +1,4 @@
+// Package config manages application configuration loaded from environment variables.
 package config
 
 import (
@@ -18,27 +19,38 @@ type Config struct {
 	DBPassword string
 	DBName     string
 
-	GinMode string
+	GinMode   string
+	JWTSecret string
 }
 
 var AppConfig Config
 
-func LoadEnv() {
-	err := godotenv.Load()
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok && value != "" {
+		return value
+	}
+	return fallback
+}
 
+// LoadEnv loads configuration from .env file or system environment variables with sensible defaults.
+func LoadEnv() *Config {
+	err := godotenv.Load()
 	if err != nil {
 		log.Println(".env file not found, using system environment variables")
 	}
 
 	AppConfig = Config{
-		AppName:    os.Getenv("APP_NAME"),
-		AppEnv:     os.Getenv("APP_ENV"),
-		Port:       os.Getenv("PORT"),
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		GinMode:    os.Getenv("GIN_MODE"),
+		AppName:    getEnv("APP_NAME", "NovaERP"),
+		AppEnv:     getEnv("APP_ENV", "development"),
+		Port:       getEnv("PORT", "8080"),
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "postgres"),
+		DBName:     getEnv("DB_NAME", "novaerp"),
+		GinMode:    getEnv("GIN_MODE", "debug"),
+		JWTSecret:  getEnv("JWT_SECRET", "novaerp-super-secret-key-change-in-production"),
 	}
+
+	return &AppConfig
 }
