@@ -10,6 +10,7 @@ import (
 	"github.com/tamim1715/novaerp/internal/config"
 	"github.com/tamim1715/novaerp/internal/database"
 	"github.com/tamim1715/novaerp/internal/logger"
+	"github.com/tamim1715/novaerp/internal/modules/auth"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
 	"github.com/tamim1715/novaerp/internal/modules/hr/attendance"
@@ -36,6 +37,12 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 		return nil, nil, fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
+	// Initialize RS256 KeyManager (loads PEM from ENV or auto-generates 2048-bit RSA key pair)
+	keyManager, err := auth.NewKeyManager(cfg.JWTPrivateKeyPEM, cfg.JWTPublicKeyPEM)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize RS256 key manager: %w", err)
+	}
+
 	// Connect database
 	db, err := database.Connect(cfg)
 	if err != nil {
@@ -53,8 +60,9 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 	// Migrate the database
 	if err := database.AutoMigrate(
 		application.DB,
-		&department.Department{},
 		&user.User{},
+		&auth.RefreshToken{},
+		&department.Department{},
 		&employee.Employee{},
 		&warehouse.Warehouse{},
 		&product.Product{},
@@ -79,8 +87,8 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 
 	router.Use(middleware.RequestID())
 
-	// Register all routes
-	routes.RegisterRoutes(router, application)
+	// Register all routes with RS256 key manager
+	routes.RegisterRoutes(router, application, keyManager)
 
 	return router, application, nil
 }

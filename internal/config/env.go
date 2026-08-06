@@ -19,8 +19,11 @@ type Config struct {
 	DBPassword string
 	DBName     string
 
-	GinMode   string
-	JWTSecret string
+	GinMode            string
+	JWTSecret          string
+	JWTPrivateKeyPEM   string
+	JWTPublicKeyPEM    string
+	CORSAllowedOrigins string
 }
 
 var AppConfig Config
@@ -40,16 +43,19 @@ func LoadEnv() *Config {
 	}
 
 	AppConfig = Config{
-		AppName:    getEnv("APP_NAME", "NovaERP"),
-		AppEnv:     getEnv("APP_ENV", "development"),
-		Port:       getEnv("PORT", "8080"),
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "postgres"),
-		DBName:     getEnv("DB_NAME", "novaerp"),
-		GinMode:    getEnv("GIN_MODE", "debug"),
-		JWTSecret:  getEnv("JWT_SECRET", "novaerp-super-secret-key-change-in-production"),
+		AppName:            getEnv("APP_NAME", "NovaERP"),
+		AppEnv:             getEnv("APP_ENV", "development"),
+		Port:               getEnv("PORT", "8080"),
+		DBHost:             getEnv("DB_HOST", "localhost"),
+		DBPort:             getEnv("DB_PORT", "5432"),
+		DBUser:             getEnv("DB_USER", "postgres"),
+		DBPassword:         getEnv("DB_PASSWORD", "postgres"),
+		DBName:             getEnv("DB_NAME", "novaerp"),
+		GinMode:            getEnv("GIN_MODE", "debug"),
+		JWTSecret:          getEnv("JWT_SECRET", "novaerp-super-secret-key-change-in-production"),
+		JWTPrivateKeyPEM:   getEnv("JWT_PRIVATE_KEY", ""),
+		JWTPublicKeyPEM:    getEnv("JWT_PUBLIC_KEY", ""),
+		CORSAllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", "*"),
 	}
 
 	return &AppConfig

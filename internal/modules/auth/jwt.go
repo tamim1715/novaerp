@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"encoding/hex"
 	"errors"
 	"time"
 
@@ -10,34 +13,39 @@ import (
 type Claims struct {
 	UserID string `json:"user_id"`
 	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-// GenerateToken creates a signed JWT token string for a user.
-func GenerateToken(userID, email, secret string, duration time.Duration) (string, error) {
+// GenerateAccessToken creates an RS256 signed access token for a user.
+func GenerateAccessToken(userID, email, role string, privateKey *rsa.PrivateKey, duration time.Duration) (string, error) {
+	now := time.Now().UTC()
 	claims := Claims{
 		UserID: userID,
 		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(now.Add(duration)),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			Subject:   userID,
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secret))
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	return token.SignedString(privateKey)
 }
 
-// ValidateToken parses and validates a JWT token string.
-func ValidateToken(tokenString, secret string) (*Claims, error) {
+// ValidateAccessToken parses and verifies an RS256 access token using RSA public key.
+func ValidateAccessToken(tokenString string, publicKey *rsa.PublicKey) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenString,
 		&Claims{},
 		func(t *jwt.Token) (interface{}, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
-			return []byte(secret), nil
+			return publicKey, nil
 		},
 	)
 
@@ -49,5 +57,14 @@ func ValidateToken(tokenString, secret string) (*Claims, error) {
 		return claims, nil
 	}
 
-	return nil, errors.New("invalid token")
+	return nil, errors.New("invalid or expired access token")
+}
+
+// GenerateRefreshTokenString creates a cryptographically secure 256-bit random hex string.
+func GenerateRefreshTokenString() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }
