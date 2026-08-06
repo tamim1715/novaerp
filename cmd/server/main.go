@@ -72,4 +72,14 @@ func main() {
 	} else {
 		application.Logger.Info("server exited gracefully")
 	}
+
+	// Close database connection pool gracefully
+	if sqlDB, err := application.DB.DB(); err == nil {
+		application.Logger.Info("closing database connection pool...")
+		if err := sqlDB.Close(); err != nil {
+			application.Logger.Error("failed to close database connection pool", zap.Error(err))
+		} else {
+			application.Logger.Info("database connection pool closed gracefully")
+		}
+	}
 }
