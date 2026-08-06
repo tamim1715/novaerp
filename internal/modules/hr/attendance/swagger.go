@@ -14,6 +14,7 @@ var (
 // @Tags Attendance
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body CheckInRequest true "Check-in payload"
 // @Success 200 {object} response.APIResponse
 // @Failure 400 {object} response.APIResponse
@@ -26,6 +27,7 @@ func _() {}
 // @Tags Attendance
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body CheckOutRequest true "Check-out payload"
 // @Success 200 {object} response.APIResponse
 // @Failure 400 {object} response.APIResponse
@@ -37,6 +39,7 @@ func _() {}
 // @Description Retrieve daily attendance records with pagination
 // @Tags Attendance
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} response.APIResponse
 // @Router /hr/attendances [get]
 func _() {}

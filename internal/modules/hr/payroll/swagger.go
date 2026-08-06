@@ -14,6 +14,7 @@ var (
 // @Tags Payroll
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body CreatePayrollPeriodRequest true "Payroll period month/year"
 // @Success 201 {object} response.APIResponse
 // @Failure 400 {object} response.APIResponse
@@ -27,6 +28,7 @@ func _() {}
 // @Tags Payroll
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Payroll Period ID"
 // @Param request body ProcessPayrollRequest true "Default allowances and deductions"
 // @Success 200 {object} response.APIResponse
@@ -39,6 +41,7 @@ func _() {}
 // @Description Retrieve generated payslips for a payroll period
 // @Tags Payroll
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Payroll Period ID"
 // @Success 200 {object} response.APIResponse
 // @Router /hr/payrolls/{id}/payslips [get]

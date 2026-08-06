@@ -14,6 +14,7 @@ var (
 // @Tags Leave Requests
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body CreateLeaveRequest true "Leave application details"
 // @Success 201 {object} response.APIResponse
 // @Failure 400 {object} response.APIResponse
@@ -27,6 +28,7 @@ func _() {}
 // @Tags Leave Requests
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Leave Request ID"
 // @Param request body UpdateLeaveStatusRequest true "Approval details"
 // @Success 200 {object} response.APIResponse
