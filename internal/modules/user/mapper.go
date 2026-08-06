@@ -1,10 +1,16 @@
 package user
 
 func ToResponse(user *User) UserResponse {
+	role := user.Role
+	if role == "" {
+		role = "user"
+	}
+
 	return UserResponse{
 		ID:        user.ID.String(),
 		Username:  user.Username,
 		Email:     user.Email,
+		Role:      role,
 		IsActive:  user.IsActive,
 		CreatedAt: user.CreatedAt.Unix(),
 	}

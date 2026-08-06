@@ -42,10 +42,16 @@ func (s *service) Create(ctx context.Context, req CreateUserRequest) (*User, err
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
+	role := req.Role
+	if role == "" {
+		role = "user"
+	}
+
 	user := &User{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: hashedPassword,
+		Role:     role,
 		IsActive: true,
 	}
 
@@ -77,6 +83,9 @@ func (s *service) Update(ctx context.Context, id string, req UpdateUserRequest) 
 	}
 	if req.Email != "" {
 		user.Email = req.Email
+	}
+	if req.Role != "" {
+		user.Role = req.Role
 	}
 	if req.IsActive != nil {
 		user.IsActive = *req.IsActive

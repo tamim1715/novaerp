@@ -5,8 +5,9 @@ import (
 	"github.com/tamim1715/novaerp/internal/modules/user"
 )
 
-func NewModule(app *app.Application) *Handler {
+func NewModule(app *app.Application, keyManager *KeyManager) *Handler {
+	authRepo := NewRepository(app.DB)
 	userRepo := user.NewRepository(app.DB)
-	service := NewService(userRepo, app.Config.JWTSecret, app.Logger)
+	service := NewService(authRepo, userRepo, keyManager, app.Logger)
 	return NewHandler(service)
 }

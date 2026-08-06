@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/tamim1715/novaerp/internal/app"
+	"github.com/tamim1715/novaerp/internal/common/middleware"
 	"github.com/tamim1715/novaerp/internal/modules/auth"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
@@ -11,32 +12,41 @@ import (
 	"github.com/tamim1715/novaerp/internal/modules/user"
 )
 
-func RegisterRoutes(router *gin.Engine, application *app.Application) {
+func RegisterRoutes(router *gin.Engine, application *app.Application, keyManager *auth.KeyManager) {
 
+	// Apply CORS Global Middleware
+	router.Use(middleware.CORS(application.Config.CORSAllowedOrigins))
+
+	// Base API Group
 	api := router.Group("/api/v1")
 
-	// Health Route
+	// Unprotected Routes
 	RegisterHealthRoutes(router, application)
 
-	// Auth Module
-	authHandler := auth.NewModule(application)
+	// Auth Module (Public Auth Endpoints)
+	authHandler := auth.NewModule(application, keyManager)
 	auth.RegisterRoutes(api.Group("/auth"), authHandler)
-
-	// Department Module
-	departmentHandler := department.NewModule(application)
-	department.RegisterRoutes(api.Group("/departments"), departmentHandler)
 
 	// User Module
 	userHandler := user.NewModule(application)
 	user.RegisterRoutes(api.Group("/users"), userHandler)
 
-	// Employee module
-	employeeHandler := employee.NewModule(application)
-	employee.RegisterRoutes(api.Group("/employees"), employeeHandler)
+	// Protected Routes Group (Secured with RS256 Bearer JWT Auth Middleware)
+	protected := api.Group("")
+	protected.Use(auth.AuthMiddleware(keyManager.PublicKey))
+	{
+		// Department Module
+		departmentHandler := department.NewModule(application)
+		department.RegisterRoutes(protected.Group("/departments"), departmentHandler)
 
-	// Inventory module
-	inventory.RegisterRoutes(api, application)
+		// Employee module
+		employeeHandler := employee.NewModule(application)
+		employee.RegisterRoutes(protected.Group("/employees"), employeeHandler)
 
-	// HR & Payroll module
-	hr.RegisterRoutes(api, application)
+		// Inventory module
+		inventory.RegisterRoutes(protected, application)
+
+		// HR & Payroll module
+		hr.RegisterRoutes(protected, application)
+	}
 }
