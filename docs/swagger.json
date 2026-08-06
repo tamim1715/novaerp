@@ -491,6 +491,385 @@
                 }
             }
         },
+        "/hr/attendances": {
+            "get": {
+                "description": "Retrieve daily attendance records with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "List attendance logs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/attendances/check-in": {
+            "post": {
+                "description": "Clock in for daily work shift",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Record employee check-in",
+                "parameters": [
+                    {
+                        "description": "Check-in payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attendance.CheckInRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/attendances/check-out": {
+            "post": {
+                "description": "Clock out for daily work shift and calculate hours",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Record employee check-out",
+                "parameters": [
+                    {
+                        "description": "Check-out payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attendance.CheckOutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/leaves/requests": {
+            "post": {
+                "description": "Submit a leave application for an employee",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Leave Requests"
+                ],
+                "summary": "Apply for leave",
+                "parameters": [
+                    {
+                        "description": "Leave application details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/leaverequest.CreateLeaveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/leaves/requests/{id}/status": {
+            "put": {
+                "description": "Update leave status to APPROVED or REJECTED",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Leave Requests"
+                ],
+                "summary": "Approve or reject leave request",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Leave Request ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Approval details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/leaverequest.UpdateLeaveStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/leaves/types": {
+            "get": {
+                "description": "Retrieve leave policy categories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Leave Types"
+                ],
+                "summary": "List leave types",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Define a new leave policy category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Leave Types"
+                ],
+                "summary": "Create a leave type",
+                "parameters": [
+                    {
+                        "description": "Leave type details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/leavetype.CreateLeaveTypeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/payrolls": {
+            "post": {
+                "description": "Initialize a monthly payroll period batch",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payroll"
+                ],
+                "summary": "Create a payroll period",
+                "parameters": [
+                    {
+                        "description": "Payroll period month/year",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payroll.CreatePayrollPeriodRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/payrolls/{id}/payslips": {
+            "get": {
+                "description": "Retrieve generated payslips for a payroll period",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payroll"
+                ],
+                "summary": "List payslips for period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payroll Period ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/payrolls/{id}/process": {
+            "post": {
+                "description": "Calculate salary slips for all active employees for the period",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payroll"
+                ],
+                "summary": "Process monthly payroll",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payroll Period ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Default allowances and deductions",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payroll.ProcessPayrollRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/inventories/products": {
             "get": {
                 "description": "Retrieve products with pagination, sorting, and search",
@@ -1251,6 +1630,38 @@
         }
     },
     "definitions": {
+        "attendance.CheckInRequest": {
+            "type": "object",
+            "required": [
+                "employeeId"
+            ],
+            "properties": {
+                "employeeId": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                },
+                "notes": {
+                    "type": "string",
+                    "example": "Arrived at main office"
+                }
+            }
+        },
+        "attendance.CheckOutRequest": {
+            "type": "object",
+            "required": [
+                "employeeId"
+            ],
+            "properties": {
+                "employeeId": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                },
+                "notes": {
+                    "type": "string",
+                    "example": "Completed shift"
+                }
+            }
+        },
         "auth.LoginRequest": {
             "type": "object",
             "required": [
@@ -1397,6 +1808,131 @@
                 "status": {
                     "type": "string",
                     "example": "active"
+                }
+            }
+        },
+        "leaverequest.CreateLeaveRequest": {
+            "type": "object",
+            "required": [
+                "employeeId",
+                "endDate",
+                "leaveTypeId",
+                "startDate"
+            ],
+            "properties": {
+                "employeeId": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                },
+                "endDate": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string",
+                    "example": "2026-08-12"
+                },
+                "leaveTypeId": {
+                    "type": "string",
+                    "example": "8a393bbd-9790-4045-853e-26a2c732ee09"
+                },
+                "reason": {
+                    "type": "string",
+                    "example": "Family vacation"
+                },
+                "startDate": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string",
+                    "example": "2026-08-10"
+                }
+            }
+        },
+        "leaverequest.UpdateLeaveStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "approvedBy": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                },
+                "remarks": {
+                    "type": "string",
+                    "example": "Approved by manager"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "APPROVED",
+                        "REJECTED"
+                    ],
+                    "example": "APPROVED"
+                }
+            }
+        },
+        "leavetype.CreateLeaveTypeRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "maxDaysPerYear",
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "example": "CL"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Standard annual casual leave"
+                },
+                "isPaid": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "maxDaysPerYear": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 14
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "Casual Leave"
+                }
+            }
+        },
+        "payroll.CreatePayrollPeriodRequest": {
+            "type": "object",
+            "required": [
+                "month",
+                "year"
+            ],
+            "properties": {
+                "month": {
+                    "type": "integer",
+                    "maximum": 12,
+                    "minimum": 1,
+                    "example": 8
+                },
+                "year": {
+                    "type": "integer",
+                    "minimum": 2020,
+                    "example": 2026
+                }
+            }
+        },
+        "payroll.ProcessPayrollRequest": {
+            "type": "object",
+            "properties": {
+                "allowancesDefault": {
+                    "description": "Standard bonus/allowance per employee",
+                    "type": "number",
+                    "example": 200
+                },
+                "deductionsDefault": {
+                    "description": "Standard tax/insurance deduction per employee",
+                    "type": "number",
+                    "example": 50
                 }
             }
         },

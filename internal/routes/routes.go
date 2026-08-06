@@ -6,6 +6,7 @@ import (
 	"github.com/tamim1715/novaerp/internal/modules/auth"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
+	"github.com/tamim1715/novaerp/internal/modules/hr"
 	"github.com/tamim1715/novaerp/internal/modules/inventory"
 	"github.com/tamim1715/novaerp/internal/modules/user"
 )
@@ -35,4 +36,7 @@ func RegisterRoutes(router *gin.Engine, application *app.Application) {
 
 	// Inventory module
 	inventory.RegisterRoutes(api, application)
+
+	// HR & Payroll module
+	hr.RegisterRoutes(api, application)
 }

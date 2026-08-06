@@ -12,6 +12,10 @@ import (
 	"github.com/tamim1715/novaerp/internal/logger"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
+	"github.com/tamim1715/novaerp/internal/modules/hr/attendance"
+	"github.com/tamim1715/novaerp/internal/modules/hr/leave/leaverequest"
+	"github.com/tamim1715/novaerp/internal/modules/hr/leave/leavetype"
+	"github.com/tamim1715/novaerp/internal/modules/hr/payroll"
 	"github.com/tamim1715/novaerp/internal/modules/inventory/product"
 	"github.com/tamim1715/novaerp/internal/modules/inventory/stock"
 	"github.com/tamim1715/novaerp/internal/modules/inventory/warehouse"
@@ -55,6 +59,11 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 		&warehouse.Warehouse{},
 		&product.Product{},
 		&stock.Stock{},
+		&leavetype.LeaveType{},
+		&leaverequest.LeaveRequest{},
+		&attendance.Attendance{},
+		&payroll.PayrollPeriod{},
+		&payroll.Payslip{},
 	); err != nil {
 		log.Error("failed to migrate database", zap.Error(err))
 		return nil, nil, fmt.Errorf("database migration failed: %w", err)

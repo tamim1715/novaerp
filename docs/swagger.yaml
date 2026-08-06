@@ -1,5 +1,27 @@
 basePath: /api/v1
 definitions:
+  attendance.CheckInRequest:
+    properties:
+      employeeId:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+      notes:
+        example: Arrived at main office
+        type: string
+    required:
+    - employeeId
+    type: object
+  attendance.CheckOutRequest:
+    properties:
+      employeeId:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+      notes:
+        example: Completed shift
+        type: string
+    required:
+    - employeeId
+    type: object
   auth.LoginRequest:
     properties:
       email:
@@ -108,6 +130,99 @@ definitions:
       status:
         example: active
         type: string
+    type: object
+  leaverequest.CreateLeaveRequest:
+    properties:
+      employeeId:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+      endDate:
+        description: YYYY-MM-DD
+        example: "2026-08-12"
+        type: string
+      leaveTypeId:
+        example: 8a393bbd-9790-4045-853e-26a2c732ee09
+        type: string
+      reason:
+        example: Family vacation
+        type: string
+      startDate:
+        description: YYYY-MM-DD
+        example: "2026-08-10"
+        type: string
+    required:
+    - employeeId
+    - endDate
+    - leaveTypeId
+    - startDate
+    type: object
+  leaverequest.UpdateLeaveStatusRequest:
+    properties:
+      approvedBy:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+      remarks:
+        example: Approved by manager
+        type: string
+      status:
+        enum:
+        - APPROVED
+        - REJECTED
+        example: APPROVED
+        type: string
+    required:
+    - status
+    type: object
+  leavetype.CreateLeaveTypeRequest:
+    properties:
+      code:
+        example: CL
+        maxLength: 20
+        type: string
+      description:
+        example: Standard annual casual leave
+        type: string
+      isPaid:
+        example: true
+        type: boolean
+      maxDaysPerYear:
+        example: 14
+        minimum: 1
+        type: integer
+      name:
+        example: Casual Leave
+        maxLength: 100
+        type: string
+    required:
+    - code
+    - maxDaysPerYear
+    - name
+    type: object
+  payroll.CreatePayrollPeriodRequest:
+    properties:
+      month:
+        example: 8
+        maximum: 12
+        minimum: 1
+        type: integer
+      year:
+        example: 2026
+        minimum: 2020
+        type: integer
+    required:
+    - month
+    - year
+    type: object
+  payroll.ProcessPayrollRequest:
+    properties:
+      allowancesDefault:
+        description: Standard bonus/allowance per employee
+        example: 200
+        type: number
+      deductionsDefault:
+        description: Standard tax/insurance deduction per employee
+        example: 50
+        type: number
     type: object
   product.CreateProductRequest:
     properties:
@@ -569,6 +684,254 @@ paths:
       summary: Update Employee
       tags:
       - Employee
+  /hr/attendances:
+    get:
+      description: Retrieve daily attendance records with pagination
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: List attendance logs
+      tags:
+      - Attendance
+  /hr/attendances/check-in:
+    post:
+      consumes:
+      - application/json
+      description: Clock in for daily work shift
+      parameters:
+      - description: Check-in payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/attendance.CheckInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Record employee check-in
+      tags:
+      - Attendance
+  /hr/attendances/check-out:
+    post:
+      consumes:
+      - application/json
+      description: Clock out for daily work shift and calculate hours
+      parameters:
+      - description: Check-out payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/attendance.CheckOutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Record employee check-out
+      tags:
+      - Attendance
+  /hr/leaves/requests:
+    post:
+      consumes:
+      - application/json
+      description: Submit a leave application for an employee
+      parameters:
+      - description: Leave application details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/leaverequest.CreateLeaveRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Apply for leave
+      tags:
+      - Leave Requests
+  /hr/leaves/requests/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Update leave status to APPROVED or REJECTED
+      parameters:
+      - description: Leave Request ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Approval details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/leaverequest.UpdateLeaveStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Approve or reject leave request
+      tags:
+      - Leave Requests
+  /hr/leaves/types:
+    get:
+      description: Retrieve leave policy categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: List leave types
+      tags:
+      - Leave Types
+    post:
+      consumes:
+      - application/json
+      description: Define a new leave policy category
+      parameters:
+      - description: Leave type details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/leavetype.CreateLeaveTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Create a leave type
+      tags:
+      - Leave Types
+  /hr/payrolls:
+    post:
+      consumes:
+      - application/json
+      description: Initialize a monthly payroll period batch
+      parameters:
+      - description: Payroll period month/year
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/payroll.CreatePayrollPeriodRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Create a payroll period
+      tags:
+      - Payroll
+  /hr/payrolls/{id}/payslips:
+    get:
+      description: Retrieve generated payslips for a payroll period
+      parameters:
+      - description: Payroll Period ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: List payslips for period
+      tags:
+      - Payroll
+  /hr/payrolls/{id}/process:
+    post:
+      consumes:
+      - application/json
+      description: Calculate salary slips for all active employees for the period
+      parameters:
+      - description: Payroll Period ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Default allowances and deductions
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/payroll.ProcessPayrollRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Process monthly payroll
+      tags:
+      - Payroll
   /inventories/products:
     get:
       description: Retrieve products with pagination, sorting, and search
