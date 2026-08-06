@@ -34,6 +34,5 @@ func RegisterRoutes(router *gin.Engine, application *app.Application) {
 	employee.RegisterRoutes(api.Group("/employees"), employeeHandler)
 
 	// Inventory module
-	inventoryHandler := inventory.NewModule(application)
-	inventory.RegisterRoutes(api, inventoryHandler)
+	inventory.RegisterRoutes(api, application)
 }

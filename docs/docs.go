@@ -497,48 +497,33 @@ const docTemplate = `{
                 }
             }
         },
-        "/products": {
+        "/inventories/products": {
             "get": {
-                "description": "Get paginated product catalog",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Retrieve products with pagination, sorting, and search",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Inventory - Products"
+                    "Products"
                 ],
-                "summary": "Get Products",
+                "summary": "List all products",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Page",
+                        "description": "Page number (default 1)",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Size",
-                        "name": "size",
+                        "description": "Items per page (default 10)",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Search",
+                        "description": "Search query",
                         "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Sort By",
-                        "name": "sortBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "asc|desc",
-                        "name": "order",
                         "in": "query"
                     }
                 ],
@@ -548,11 +533,17 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
                     }
                 }
             },
             "post": {
-                "description": "Create a new product item in catalog",
+                "description": "Add a new product to inventory",
                 "consumes": [
                     "application/json"
                 ],
@@ -560,17 +551,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Inventory - Products"
+                    "Products"
                 ],
-                "summary": "Create Product",
+                "summary": "Create a product",
                 "parameters": [
                     {
-                        "description": "Product",
+                        "description": "Product creation details",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/inventory.CreateProductRequest"
+                            "$ref": "#/definitions/product.CreateProductRequest"
                         }
                     }
                 ],
@@ -596,16 +587,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/{id}": {
+        "/inventories/products/{id}": {
             "get": {
-                "description": "Get product details by ID",
+                "description": "Retrieve details of a specific product",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Inventory - Products"
+                    "Products"
                 ],
-                "summary": "Get Product",
+                "summary": "Get product by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -624,6 +615,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
@@ -631,7 +628,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update product details",
+                "description": "Update product details by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -639,9 +636,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Inventory - Products"
+                    "Products"
                 ],
-                "summary": "Update Product",
+                "summary": "Update product",
                 "parameters": [
                     {
                         "type": "string",
@@ -651,12 +648,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Product",
+                        "description": "Product update fields",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/inventory.UpdateProductRequest"
+                            "$ref": "#/definitions/product.UpdateProductRequest"
                         }
                     }
                 ],
@@ -675,6 +672,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
@@ -682,14 +685,14 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete product item",
+                "description": "Remove a product by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Inventory - Products"
+                    "Products"
                 ],
-                "summary": "Delete Product",
+                "summary": "Delete product",
                 "parameters": [
                     {
                         "type": "string",
@@ -711,34 +714,37 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
                     }
                 }
             }
         },
-        "/stocks": {
+        "/inventories/stocks": {
             "get": {
-                "description": "Get stock balances across warehouses",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Retrieve inventory stock levels across warehouses",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Inventory - Stocks"
+                    "Stocks"
                 ],
-                "summary": "Get Stocks",
+                "summary": "List all stock entries",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Page",
+                        "description": "Page number (default 1)",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Size",
-                        "name": "size",
+                        "description": "Items per page (default 10)",
+                        "name": "limit",
                         "in": "query"
                     }
                 ],
@@ -748,13 +754,19 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
                     }
                 }
             }
         },
-        "/stocks/adjust": {
+        "/inventories/stocks/adjust": {
             "post": {
-                "description": "Adjust quantity of a product in a warehouse",
+                "description": "Increase or decrease quantity of a product in a warehouse",
                 "consumes": [
                     "application/json"
                 ],
@@ -762,17 +774,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Inventory - Stocks"
+                    "Stocks"
                 ],
-                "summary": "Adjust Stock",
+                "summary": "Adjust product stock in warehouse",
                 "parameters": [
                     {
-                        "description": "Stock Adjustment",
+                        "description": "Stock adjustment details",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/inventory.AdjustStockRequest"
+                            "$ref": "#/definitions/stock.AdjustStockRequest"
                         }
                     }
                 ],
@@ -785,6 +797,239 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/warehouses": {
+            "get": {
+                "description": "Retrieve warehouses with pagination, sorting, and search",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Warehouses"
+                ],
+                "summary": "List all warehouses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a new warehouse to inventory",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Warehouses"
+                ],
+                "summary": "Create a warehouse",
+                "parameters": [
+                    {
+                        "description": "Warehouse creation details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/warehouse.CreateWarehouseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/warehouses/{id}": {
+            "get": {
+                "description": "Retrieve details of a specific warehouse",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Warehouses"
+                ],
+                "summary": "Get warehouse by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Warehouse ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update warehouse details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Warehouses"
+                ],
+                "summary": "Update warehouse",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Warehouse ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Warehouse update fields",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/warehouse.UpdateWarehouseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a warehouse by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Warehouses"
+                ],
+                "summary": "Delete warehouse",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Warehouse ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
@@ -1009,224 +1254,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/warehouses": {
-            "get": {
-                "description": "Get paginated list of warehouses",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Inventory - Warehouses"
-                ],
-                "summary": "Get Warehouses",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Page",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Size",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Search",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Sort By",
-                        "name": "sortBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "asc|desc",
-                        "name": "order",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new warehouse location",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Inventory - Warehouses"
-                ],
-                "summary": "Create Warehouse",
-                "parameters": [
-                    {
-                        "description": "Warehouse",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/inventory.CreateWarehouseRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/warehouses/{id}": {
-            "get": {
-                "description": "Get warehouse by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Inventory - Warehouses"
-                ],
-                "summary": "Get Warehouse",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Warehouse ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update warehouse details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Inventory - Warehouses"
-                ],
-                "summary": "Update Warehouse",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Warehouse ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Warehouse",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/inventory.UpdateWarehouseRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete warehouse",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Inventory - Warehouses"
-                ],
-                "summary": "Delete Warehouse",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Warehouse ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/response.APIResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -1379,30 +1406,7 @@ const docTemplate = `{
                 }
             }
         },
-        "inventory.AdjustStockRequest": {
-            "type": "object",
-            "required": [
-                "productId",
-                "quantityDelta",
-                "warehouseId"
-            ],
-            "properties": {
-                "productId": {
-                    "type": "string",
-                    "example": "8a393bbd-9790-4045-853e-26a2c732ee09"
-                },
-                "quantityDelta": {
-                    "description": "Positive to add, negative to reduce",
-                    "type": "integer",
-                    "example": 50
-                },
-                "warehouseId": {
-                    "type": "string",
-                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
-                }
-            }
-        },
-        "inventory.CreateProductRequest": {
+        "product.CreateProductRequest": {
             "type": "object",
             "required": [
                 "name",
@@ -1441,30 +1445,7 @@ const docTemplate = `{
                 }
             }
         },
-        "inventory.CreateWarehouseRequest": {
-            "type": "object",
-            "required": [
-                "code",
-                "name"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "example": "WH-001"
-                },
-                "location": {
-                    "type": "string",
-                    "example": "Building A, Industrial Area"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "example": "Main Warehouse"
-                }
-            }
-        },
-        "inventory.UpdateProductRequest": {
+        "product.UpdateProductRequest": {
             "type": "object",
             "properties": {
                 "category": {
@@ -1497,27 +1478,6 @@ const docTemplate = `{
                 }
             }
         },
-        "inventory.UpdateWarehouseRequest": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "WH-001"
-                },
-                "isActive": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "location": {
-                    "type": "string",
-                    "example": "Building A, Industrial Area"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Main Warehouse Updated"
-                }
-            }
-        },
         "response.APIResponse": {
             "type": "object",
             "properties": {
@@ -1527,6 +1487,29 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "stock.AdjustStockRequest": {
+            "type": "object",
+            "required": [
+                "productId",
+                "quantityDelta",
+                "warehouseId"
+            ],
+            "properties": {
+                "productId": {
+                    "type": "string",
+                    "example": "8a393bbd-9790-4045-853e-26a2c732ee09"
+                },
+                "quantityDelta": {
+                    "description": "Positive to add, negative to reduce",
+                    "type": "integer",
+                    "example": 50
+                },
+                "warehouseId": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
                 }
             }
         },
@@ -1563,6 +1546,50 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "warehouse.CreateWarehouseRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "example": "WH-001"
+                },
+                "location": {
+                    "type": "string",
+                    "example": "Building A, Industrial Area"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "Main Warehouse"
+                }
+            }
+        },
+        "warehouse.UpdateWarehouseRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "WH-001"
+                },
+                "isActive": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "location": {
+                    "type": "string",
+                    "example": "Building A, Industrial Area"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Main Warehouse Updated"
                 }
             }
         }

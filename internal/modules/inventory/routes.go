@@ -1,32 +1,43 @@
 package inventory
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/tamim1715/novaerp/internal/app"
+	"github.com/tamim1715/novaerp/internal/modules/inventory/product"
+	"github.com/tamim1715/novaerp/internal/modules/inventory/stock"
+	"github.com/tamim1715/novaerp/internal/modules/inventory/warehouse"
+)
 
-func RegisterRoutes(api *gin.RouterGroup, handler *Handler) {
-	// Warehouse routes
-	warehouses := api.Group("/warehouses")
+// RegisterRoutes registers all inventory submodules under /inventories (and /inventorys for compatibility).
+func RegisterRoutes(api *gin.RouterGroup, application *app.Application) {
+	// Initialize Submodule Repositories
+	warehouseRepo := warehouse.NewRepository(application.DB)
+	productRepo := product.NewRepository(application.DB)
+	stockRepo := stock.NewRepository(application.DB)
+
+	// Initialize Submodule Services
+	warehouseService := warehouse.NewService(warehouseRepo, application.Logger)
+	productService := product.NewService(productRepo, application.Logger)
+	stockService := stock.NewService(stockRepo, warehouseRepo, productRepo, application.Logger)
+
+	// Initialize Submodule Handlers
+	warehouseHandler := warehouse.NewHandler(warehouseService)
+	productHandler := product.NewHandler(productService)
+	stockHandler := stock.NewHandler(stockService)
+
+	// Primary REST endpoint: /api/v1/inventories/...
+	inventoriesGroup := api.Group("/inventories")
 	{
-		warehouses.POST("", handler.CreateWarehouse)
-		warehouses.GET("", handler.FindAllWarehouses)
-		warehouses.GET("/:id", handler.FindWarehouseByID)
-		warehouses.PUT("/:id", handler.UpdateWarehouse)
-		warehouses.DELETE("/:id", handler.DeleteWarehouse)
+		warehouse.RegisterRoutes(inventoriesGroup.Group("/warehouses"), warehouseHandler)
+		product.RegisterRoutes(inventoriesGroup.Group("/products"), productHandler)
+		stock.RegisterRoutes(inventoriesGroup.Group("/stocks"), stockHandler)
 	}
 
-	// Product routes
-	products := api.Group("/products")
+	// Alias endpoint: /api/v1/inventorys/...
+	inventorysGroup := api.Group("/inventorys")
 	{
-		products.POST("", handler.CreateProduct)
-		products.GET("", handler.FindAllProducts)
-		products.GET("/:id", handler.FindProductByID)
-		products.PUT("/:id", handler.UpdateProduct)
-		products.DELETE("/:id", handler.DeleteProduct)
-	}
-
-	// Stock routes
-	stocks := api.Group("/stocks")
-	{
-		stocks.GET("", handler.FindAllStocks)
-		stocks.POST("/adjust", handler.AdjustStock)
+		warehouse.RegisterRoutes(inventorysGroup.Group("/warehouses"), warehouseHandler)
+		product.RegisterRoutes(inventorysGroup.Group("/products"), productHandler)
+		stock.RegisterRoutes(inventorysGroup.Group("/stocks"), stockHandler)
 	}
 }

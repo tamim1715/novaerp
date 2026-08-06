@@ -12,7 +12,9 @@ import (
 	"github.com/tamim1715/novaerp/internal/logger"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
-	"github.com/tamim1715/novaerp/internal/modules/inventory"
+	"github.com/tamim1715/novaerp/internal/modules/inventory/product"
+	"github.com/tamim1715/novaerp/internal/modules/inventory/stock"
+	"github.com/tamim1715/novaerp/internal/modules/inventory/warehouse"
 	"github.com/tamim1715/novaerp/internal/modules/user"
 	"github.com/tamim1715/novaerp/internal/routes"
 	"go.uber.org/zap"
@@ -50,9 +52,9 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 		&department.Department{},
 		&user.User{},
 		&employee.Employee{},
-		&inventory.Warehouse{},
-		&inventory.Product{},
-		&inventory.Stock{},
+		&warehouse.Warehouse{},
+		&product.Product{},
+		&stock.Stock{},
 	); err != nil {
 		log.Error("failed to migrate database", zap.Error(err))
 		return nil, nil, fmt.Errorf("database migration failed: %w", err)
