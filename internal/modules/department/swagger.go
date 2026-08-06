@@ -11,12 +11,12 @@ var (
 )
 
 // CreateDoc Create godoc
-//
 // @Summary Create Department
 // @Description Create a new department
 // @Tags Department
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body CreateDepartmentRequest true "Department"
 // @Success 201 {object} response.APIResponse
 // @Failure 400 {object} response.APIResponse
@@ -27,12 +27,12 @@ func (h *Handler) CreateDoc(c *gin.Context) {
 }
 
 // FindAllDoc FindAll godoc
-//
 // @Summary Get Departments
 // @Description Get all departments
 // @Tags Department
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param page query int false "Page"
 // @Param size query int false "Size"
 // @Param search query string false "Search"
@@ -45,11 +45,11 @@ func (h *Handler) FindAllDoc(c *gin.Context) {
 }
 
 // FindByIDDoc FindByID godoc
-//
 // @Summary Get Department
 // @Description Get department by ID
 // @Tags Department
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Department ID"
 // @Success 200 {object} response.APIResponse
 // @Failure 404 {object} response.APIResponse
@@ -59,12 +59,12 @@ func (h *Handler) FindByIDDoc(c *gin.Context) {
 }
 
 // UpdateDoc Update godoc
-//
 // @Summary Update Department
 // @Description Update department
 // @Tags Department
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Department ID"
 // @Param request body UpdateDepartmentRequest true "Department"
 // @Success 200 {object} response.APIResponse
@@ -76,11 +76,11 @@ func (h *Handler) UpdateDoc(c *gin.Context) {
 }
 
 // DeleteDoc Delete godoc
-//
 // @Summary Delete Department
 // @Description Soft delete department
 // @Tags Department
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Department ID"
 // @Success 200 {object} response.APIResponse
 // @Failure 404 {object} response.APIResponse

@@ -15,6 +15,7 @@ var (
 // @Tags User
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body CreateUserRequest true "User"
 // @Success 201 {object} response.APIResponse
 // @Failure 400 {object} response.APIResponse
@@ -30,6 +31,7 @@ func (h *Handler) CreateDoc(c *gin.Context) {
 // @Tags User
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param page query int false "Page"
 // @Param size query int false "Size"
 // @Param search query string false "Search"
@@ -46,6 +48,7 @@ func (h *Handler) FindAllDoc(c *gin.Context) {
 // @Description Get user by ID
 // @Tags User
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Success 200 {object} response.APIResponse
 // @Failure 404 {object} response.APIResponse
@@ -60,6 +63,7 @@ func (h *Handler) FindByIDDoc(c *gin.Context) {
 // @Tags User
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Param request body UpdateUserRequest true "User"
 // @Success 200 {object} response.APIResponse
@@ -75,10 +79,11 @@ func (h *Handler) UpdateDoc(c *gin.Context) {
 // @Description Soft delete user account
 // @Tags User
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Success 200 {object} response.APIResponse
 // @Failure 404 {object} response.APIResponse
 // @Router /users/{id} [delete]
-func (h *Handler) DeleteDoc(c *gin.Context) {
+func _(h *Handler, c *gin.Context) {
 	h.Delete(c)
 }

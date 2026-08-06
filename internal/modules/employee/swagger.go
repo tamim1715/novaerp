@@ -10,12 +10,12 @@ var (
 )
 
 // CreateDoc Create godoc
-//
 // @Summary Create Employee
 // @Description Create a new employee
 // @Tags Employee
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body CreateEmployeeRequest true "Employee"
 // @Success 201 {object} response.APIResponse
 // @Failure 400 {object} response.APIResponse
@@ -26,12 +26,12 @@ func (h *Handler) CreateDoc(c *gin.Context) {
 }
 
 // FindAllDoc FindAll godoc
-//
 // @Summary Get Employees
 // @Description Get all employees
 // @Tags Employee
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param page query int false "Page"
 // @Param size query int false "Size"
 // @Param search query string false "Search"
@@ -44,11 +44,11 @@ func (h *Handler) FindAllDoc(c *gin.Context) {
 }
 
 // FindByIDDoc FindByID godoc
-//
 // @Summary Get Employee
 // @Description Get employee by ID
 // @Tags Employee
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Employee ID"
 // @Success 200 {object} response.APIResponse
 // @Failure 404 {object} response.APIResponse
@@ -58,12 +58,12 @@ func (h *Handler) FindByIDDoc(c *gin.Context) {
 }
 
 // UpdateDoc Update godoc
-//
 // @Summary Update Employee
 // @Description Update employee
 // @Tags Employee
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Employee ID"
 // @Param request body UpdateEmployeeRequest true "Employee"
 // @Success 200 {object} response.APIResponse
@@ -75,11 +75,11 @@ func (h *Handler) UpdateDoc(c *gin.Context) {
 }
 
 // DeleteDoc Delete godoc
-//
 // @Summary Delete Employee
 // @Description Soft delete employee
 // @Tags Employee
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Employee ID"
 // @Success 200 {object} response.APIResponse
 // @Failure 404 {object} response.APIResponse
