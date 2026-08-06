@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,15 +46,16 @@ func (s *service) CheckIn(ctx context.Context, req CheckInRequest) (*Attendance,
 		return nil, fmt.Errorf("employee not found: %w", err)
 	}
 
-	now := time.Now()
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	localNow := time.Now()
+	nowUTC := localNow.UTC()
+	today := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, time.UTC)
 
 	att, err := s.repo.FindByEmployeeAndDate(ctx, empID, today)
 	if err == nil {
 		if att.CheckIn != nil {
 			return nil, errors.New("employee already checked in today")
 		}
-		att.CheckIn = &now
+		att.CheckIn = &nowUTC
 		if req.Notes != "" {
 			att.Notes = req.Notes
 		}
@@ -66,15 +68,15 @@ func (s *service) CheckIn(ctx context.Context, req CheckInRequest) (*Attendance,
 	}
 
 	status := "PRESENT"
-	// If check in after 09:30 AM, mark as LATE
-	if now.Hour() > 9 || (now.Hour() == 9 && now.Minute() > 30) {
+	// If check in after 09:30 AM local time, mark as LATE
+	if localNow.Hour() > 9 || (localNow.Hour() == 9 && localNow.Minute() > 30) {
 		status = "LATE"
 	}
 
 	att = &Attendance{
 		EmployeeID: empID,
 		Date:       today,
-		CheckIn:    &now,
+		CheckIn:    &nowUTC,
 		Status:     status,
 		Notes:      req.Notes,
 	}
@@ -92,8 +94,9 @@ func (s *service) CheckOut(ctx context.Context, req CheckOutRequest) (*Attendanc
 		return nil, errors.New("invalid employee ID format")
 	}
 
-	now := time.Now()
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	localNow := time.Now()
+	nowUTC := localNow.UTC()
+	today := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, time.UTC)
 
 	att, err := s.repo.FindByEmployeeAndDate(ctx, empID, today)
 	if err != nil {
@@ -107,13 +110,20 @@ func (s *service) CheckOut(ctx context.Context, req CheckOutRequest) (*Attendanc
 		return nil, errors.New("cannot check out without prior check-in")
 	}
 
-	att.CheckOut = &now
-	duration := now.Sub(*att.CheckIn).Hours()
+	att.CheckOut = &nowUTC
+
+	// Calculate duration between CheckOut (nowUTC) and CheckIn (att.CheckIn)
+	duration := nowUTC.Sub(att.CheckIn.UTC()).Hours()
+	if duration < 0 {
+		duration = 0
+	}
+	duration = math.Round(duration*100) / 100
+
 	att.WorkHours = duration
 
 	// Standard work shift = 8 hours; any excess is overtime
 	if duration > 8.0 {
-		att.OvertimeHours = duration - 8.0
+		att.OvertimeHours = math.Round((duration-8.0)*100) / 100
 	} else {
 		att.OvertimeHours = 0
 	}
@@ -159,22 +169,28 @@ func (s *service) CreateAttendance(ctx context.Context, req CreateAttendanceRequ
 	if req.CheckIn != "" {
 		ci, err := time.Parse(time.RFC3339, req.CheckIn)
 		if err == nil {
-			att.CheckIn = &ci
+			ciUTC := ci.UTC()
+			att.CheckIn = &ciUTC
 		}
 	}
 
 	if req.CheckOut != "" {
 		co, err := time.Parse(time.RFC3339, req.CheckOut)
 		if err == nil {
-			att.CheckOut = &co
+			coUTC := co.UTC()
+			att.CheckOut = &coUTC
 		}
 	}
 
 	if att.CheckIn != nil && att.CheckOut != nil {
-		dur := att.CheckOut.Sub(*att.CheckIn).Hours()
+		dur := att.CheckOut.UTC().Sub(att.CheckIn.UTC()).Hours()
+		if dur < 0 {
+			dur = 0
+		}
+		dur = math.Round(dur*100) / 100
 		att.WorkHours = dur
 		if dur > 8.0 {
-			att.OvertimeHours = dur - 8.0
+			att.OvertimeHours = math.Round((dur-8.0)*100) / 100
 		}
 	}
 
