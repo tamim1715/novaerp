@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/auth/login": {
             "post": {
-                "description": "Authenticate user and return JWT bearer token",
+                "description": "Authenticate user and return RS256 Access Token and Refresh Token",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,10 +27,10 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "User Login",
+                "summary": "User login",
                 "parameters": [
                     {
-                        "description": "Login Credentials",
+                        "description": "Login credentials",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -46,8 +46,82 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.APIResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "description": "Revoke refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User logout",
+                "parameters": [
+                    {
+                        "description": "Logout payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LogoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Exchange a valid refresh token for a new RS256 access token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
@@ -63,6 +137,11 @@ const docTemplate = `{
         },
         "/departments": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all departments",
                 "consumes": [
                     "application/json"
@@ -116,6 +195,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new department",
                 "consumes": [
                     "application/json"
@@ -162,6 +246,11 @@ const docTemplate = `{
         },
         "/departments/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get department by ID",
                 "produces": [
                     "application/json"
@@ -195,6 +284,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update department",
                 "consumes": [
                     "application/json"
@@ -246,6 +340,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Soft delete department",
                 "produces": [
                     "application/json"
@@ -281,6 +380,11 @@ const docTemplate = `{
         },
         "/employees": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all employees",
                 "consumes": [
                     "application/json"
@@ -334,6 +438,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new employee",
                 "consumes": [
                     "application/json"
@@ -380,6 +489,11 @@ const docTemplate = `{
         },
         "/employees/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get employee by ID",
                 "produces": [
                     "application/json"
@@ -413,6 +527,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update employee",
                 "consumes": [
                     "application/json"
@@ -464,6 +583,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Soft delete employee",
                 "produces": [
                     "application/json"
@@ -499,6 +623,11 @@ const docTemplate = `{
         },
         "/hr/attendances": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve daily attendance records with pagination",
                 "produces": [
                     "application/json"
@@ -519,6 +648,11 @@ const docTemplate = `{
         },
         "/hr/attendances/check-in": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Clock in for daily work shift",
                 "consumes": [
                     "application/json"
@@ -559,6 +693,11 @@ const docTemplate = `{
         },
         "/hr/attendances/check-out": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Clock out for daily work shift and calculate hours",
                 "consumes": [
                     "application/json"
@@ -599,6 +738,11 @@ const docTemplate = `{
         },
         "/hr/leaves/requests": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Submit a leave application for an employee",
                 "consumes": [
                     "application/json"
@@ -645,6 +789,11 @@ const docTemplate = `{
         },
         "/hr/leaves/requests/{id}/status": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update leave status to APPROVED or REJECTED",
                 "consumes": [
                     "application/json"
@@ -692,6 +841,11 @@ const docTemplate = `{
         },
         "/hr/leaves/types": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve leave policy categories",
                 "produces": [
                     "application/json"
@@ -710,6 +864,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Define a new leave policy category",
                 "consumes": [
                     "application/json"
@@ -756,6 +915,11 @@ const docTemplate = `{
         },
         "/hr/payrolls": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Initialize a monthly payroll period batch",
                 "consumes": [
                     "application/json"
@@ -802,6 +966,11 @@ const docTemplate = `{
         },
         "/hr/payrolls/{id}/payslips": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve generated payslips for a payroll period",
                 "produces": [
                     "application/json"
@@ -831,6 +1000,11 @@ const docTemplate = `{
         },
         "/hr/payrolls/{id}/process": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Calculate salary slips for all active employees for the period",
                 "consumes": [
                     "application/json"
@@ -878,6 +1052,11 @@ const docTemplate = `{
         },
         "/inventories/products": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve products with pagination, sorting, and search",
                 "produces": [
                     "application/json"
@@ -922,6 +1101,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Add a new product to inventory",
                 "consumes": [
                     "application/json"
@@ -968,6 +1152,11 @@ const docTemplate = `{
         },
         "/inventories/products/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve details of a specific product",
                 "produces": [
                     "application/json"
@@ -1007,6 +1196,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update product details by ID",
                 "consumes": [
                     "application/json"
@@ -1064,6 +1258,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Remove a product by ID",
                 "produces": [
                     "application/json"
@@ -1105,6 +1304,11 @@ const docTemplate = `{
         },
         "/inventories/stocks": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve inventory stock levels across warehouses",
                 "produces": [
                     "application/json"
@@ -1145,6 +1349,11 @@ const docTemplate = `{
         },
         "/inventories/stocks/adjust": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Increase or decrease quantity of a product in a warehouse",
                 "consumes": [
                     "application/json"
@@ -1191,6 +1400,11 @@ const docTemplate = `{
         },
         "/inventories/warehouses": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve warehouses with pagination, sorting, and search",
                 "produces": [
                     "application/json"
@@ -1235,6 +1449,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Add a new warehouse to inventory",
                 "consumes": [
                     "application/json"
@@ -1281,6 +1500,11 @@ const docTemplate = `{
         },
         "/inventories/warehouses/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve details of a specific warehouse",
                 "produces": [
                     "application/json"
@@ -1320,6 +1544,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update warehouse details by ID",
                 "consumes": [
                     "application/json"
@@ -1377,6 +1606,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Remove a warehouse by ID",
                 "produces": [
                     "application/json"
@@ -1418,6 +1652,11 @@ const docTemplate = `{
         },
         "/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get paginated list of users",
                 "consumes": [
                     "application/json"
@@ -1471,6 +1710,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new user account",
                 "consumes": [
                     "application/json"
@@ -1517,6 +1761,11 @@ const docTemplate = `{
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get user by ID",
                 "produces": [
                     "application/json"
@@ -1550,6 +1799,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update user details",
                 "consumes": [
                     "application/json"
@@ -1601,6 +1855,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Soft delete user account",
                 "produces": [
                     "application/json"
@@ -1676,10 +1935,37 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@novaerp.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "secret123"
+                }
+            }
+        },
+        "auth.LogoutRequest": {
+            "type": "object",
+            "required": [
+                "refreshToken"
+            ],
+            "properties": {
+                "refreshToken": {
+                    "type": "string",
+                    "example": "6f4a8b..."
+                }
+            }
+        },
+        "auth.RefreshTokenRequest": {
+            "type": "object",
+            "required": [
+                "refreshToken"
+            ],
+            "properties": {
+                "refreshToken": {
+                    "type": "string",
+                    "example": "6f4a8b..."
                 }
             }
         },
@@ -2064,6 +2350,10 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 8
                 },
+                "role": {
+                    "type": "string",
+                    "example": "admin"
+                },
                 "username": {
                     "type": "string",
                     "maxLength": 50,
@@ -2079,6 +2369,9 @@ const docTemplate = `{
                 },
                 "isActive": {
                     "type": "boolean"
+                },
+                "role": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string"
@@ -2129,6 +2422,14 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and your RS256 Access Token. Example: \"Bearer eyJhbGciOiJSUzI1Ni...\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -2139,7 +2440,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Nova ERP API",
-	Description:      "Nova ERP REST API",
+	Description:      "Nova ERP REST API with RS256 JWT Authentication",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,8 +1,13 @@
 // @title Nova ERP API
 // @version 1.0
-// @description Nova ERP REST API
+// @description Nova ERP REST API with RS256 JWT Authentication
 // @BasePath /api/v1
 // @host localhost:8080
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and your RS256 Access Token. Example: "Bearer eyJhbGciOiJSUzI1Ni..."
 
 package main
 

@@ -25,12 +25,31 @@ definitions:
   auth.LoginRequest:
     properties:
       email:
+        example: admin@novaerp.com
         type: string
       password:
+        example: secret123
+        minLength: 6
         type: string
     required:
     - email
     - password
+    type: object
+  auth.LogoutRequest:
+    properties:
+      refreshToken:
+        example: 6f4a8b...
+        type: string
+    required:
+    - refreshToken
+    type: object
+  auth.RefreshTokenRequest:
+    properties:
+      refreshToken:
+        example: 6f4a8b...
+        type: string
+    required:
+    - refreshToken
     type: object
   department.CreateDepartmentRequest:
     properties:
@@ -309,6 +328,9 @@ definitions:
       password:
         minLength: 8
         type: string
+      role:
+        example: admin
+        type: string
       username:
         maxLength: 50
         minLength: 3
@@ -324,6 +346,8 @@ definitions:
         type: string
       isActive:
         type: boolean
+      role:
+        type: string
       username:
         type: string
     type: object
@@ -362,7 +386,7 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Nova ERP REST API
+  description: Nova ERP REST API with RS256 JWT Authentication
   title: Nova ERP API
   version: "1.0"
 paths:
@@ -370,9 +394,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate user and return JWT bearer token
+      description: Authenticate user and return RS256 Access Token and Refresh Token
       parameters:
-      - description: Login Credentials
+      - description: Login credentials
         in: body
         name: request
         required: true
@@ -385,15 +409,63 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
-        "400":
-          description: Bad Request
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: User login
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revoke refresh token
+      parameters:
+      - description: Logout payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: User logout
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Exchange a valid refresh token for a new RS256 access token
+      parameters:
+      - description: Refresh token payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.APIResponse'
-      summary: User Login
+      summary: Refresh access token
       tags:
       - Auth
   /departments:
@@ -429,6 +501,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get Departments
       tags:
       - Department
@@ -458,6 +532,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create Department
       tags:
       - Department
@@ -481,6 +557,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete Department
       tags:
       - Department
@@ -503,6 +581,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get Department
       tags:
       - Department
@@ -537,6 +617,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update Department
       tags:
       - Department
@@ -573,6 +655,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get Employees
       tags:
       - Employee
@@ -602,6 +686,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create Employee
       tags:
       - Employee
@@ -625,6 +711,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete Employee
       tags:
       - Employee
@@ -647,6 +735,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get Employee
       tags:
       - Employee
@@ -681,6 +771,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update Employee
       tags:
       - Employee
@@ -694,6 +786,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: List attendance logs
       tags:
       - Attendance
@@ -720,6 +814,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Record employee check-in
       tags:
       - Attendance
@@ -746,6 +842,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Record employee check-out
       tags:
       - Attendance
@@ -776,6 +874,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Apply for leave
       tags:
       - Leave Requests
@@ -807,6 +907,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Approve or reject leave request
       tags:
       - Leave Requests
@@ -820,6 +922,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: List leave types
       tags:
       - Leave Types
@@ -849,6 +953,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a leave type
       tags:
       - Leave Types
@@ -879,6 +985,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a payroll period
       tags:
       - Payroll
@@ -898,6 +1006,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: List payslips for period
       tags:
       - Payroll
@@ -929,6 +1039,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Process monthly payroll
       tags:
       - Payroll
@@ -959,6 +1071,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: List all products
       tags:
       - Products
@@ -988,6 +1102,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a product
       tags:
       - Products
@@ -1015,6 +1131,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete product
       tags:
       - Products
@@ -1041,6 +1159,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get product by ID
       tags:
       - Products
@@ -1079,6 +1199,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update product
       tags:
       - Products
@@ -1105,6 +1227,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: List all stock entries
       tags:
       - Stocks
@@ -1135,6 +1259,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Adjust product stock in warehouse
       tags:
       - Stocks
@@ -1165,6 +1291,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: List all warehouses
       tags:
       - Warehouses
@@ -1194,6 +1322,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a warehouse
       tags:
       - Warehouses
@@ -1221,6 +1351,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete warehouse
       tags:
       - Warehouses
@@ -1247,6 +1379,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get warehouse by ID
       tags:
       - Warehouses
@@ -1285,6 +1419,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update warehouse
       tags:
       - Warehouses
@@ -1321,6 +1457,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get Users
       tags:
       - User
@@ -1350,6 +1488,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create User
       tags:
       - User
@@ -1373,6 +1513,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete User
       tags:
       - User
@@ -1395,6 +1537,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get User
       tags:
       - User
@@ -1429,7 +1573,16 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update User
       tags:
       - User
+securityDefinitions:
+  BearerAuth:
+    description: 'Type "Bearer" followed by a space and your RS256 Access Token. Example:
+      "Bearer eyJhbGciOiJSUzI1Ni..."'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
