@@ -51,6 +51,12 @@ novaerp/
 │   ├── handler/                     # Base health check handlers
 │   ├── logger/                      # Zap Structured Logger
 │   ├── modules/                     # Domain Modules & Submodules
+│   │   ├── accounting/              # Financial & Accounting Submodules
+│   │   │   ├── account/             # Chart of Accounts (COA) & Account Hierarchy Tree
+│   │   │   ├── journal/             # Double-Entry General Ledger & Atomic Posting
+│   │   │   ├── period/              # Fiscal Years & 12-Month Financial Sub-Periods
+│   │   │   ├── report/              # Financial Statements (GL, Trial Balance, P&L, Balance Sheet)
+│   │   │   └── routes.go            # Accounting Route Aggregator
 │   │   ├── auth/                    # RS256 JWT, Refresh Tokens, KeyManager & Middleware
 │   │   ├── department/              # Department Management
 │   │   ├── employee/                # Employee Profiles & Master Data
