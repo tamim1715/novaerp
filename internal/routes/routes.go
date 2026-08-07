@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tamim1715/novaerp/internal/app"
 	"github.com/tamim1715/novaerp/internal/common/middleware"
+	"github.com/tamim1715/novaerp/internal/modules/accounting"
 	"github.com/tamim1715/novaerp/internal/modules/auth"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
@@ -48,5 +49,8 @@ func RegisterRoutes(router *gin.Engine, application *app.Application, keyManager
 
 		// HR & Payroll module
 		hr.RegisterRoutes(protected, application)
+
+		// Accounting & Financial Management module
+		accounting.RegisterRoutes(protected, application)
 	}
 }
