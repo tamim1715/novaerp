@@ -1,5 +1,116 @@
 basePath: /api/v1
 definitions:
+  account.AccountResponse:
+    properties:
+      code:
+        type: string
+      createdAt:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      isActive:
+        type: boolean
+      isSystem:
+        type: boolean
+      name:
+        type: string
+      normalBalance:
+        type: string
+      parentId:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  account.AccountTreeResponse:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/account.AccountTreeResponse'
+        type: array
+      code:
+        type: string
+      createdAt:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      isActive:
+        type: boolean
+      isSystem:
+        type: boolean
+      name:
+        type: string
+      normalBalance:
+        type: string
+      parentId:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  account.CreateAccountRequest:
+    properties:
+      code:
+        maxLength: 50
+        minLength: 2
+        type: string
+      currency:
+        type: string
+      description:
+        maxLength: 255
+        type: string
+      isActive:
+        type: boolean
+      name:
+        maxLength: 150
+        minLength: 2
+        type: string
+      normalBalance:
+        enum:
+        - DEBIT
+        - CREDIT
+        type: string
+      parentId:
+        type: string
+      type:
+        enum:
+        - ASSET
+        - LIABILITY
+        - EQUITY
+        - REVENUE
+        - EXPENSE
+        type: string
+    required:
+    - code
+    - name
+    - type
+    type: object
+  account.UpdateAccountRequest:
+    properties:
+      currency:
+        type: string
+      description:
+        maxLength: 255
+        type: string
+      isActive:
+        type: boolean
+      name:
+        maxLength: 150
+        minLength: 2
+        type: string
+      parentId:
+        type: string
+    type: object
   attendance.CheckInRequest:
     properties:
       employeeId:
@@ -150,6 +261,139 @@ definitions:
         example: active
         type: string
     type: object
+  journal.CreateJournalEntryRequest:
+    properties:
+      autoPost:
+        type: boolean
+      description:
+        maxLength: 255
+        minLength: 3
+        type: string
+      entryDate:
+        type: string
+      lines:
+        items:
+          $ref: '#/definitions/journal.CreateJournalLineRequest'
+        minItems: 2
+        type: array
+      reference:
+        maxLength: 100
+        type: string
+      sourceId:
+        type: string
+      sourceType:
+        enum:
+        - MANUAL
+        - PAYROLL
+        - INVOICE
+        - PAYMENT
+        - STOCK_ADJUSTMENT
+        type: string
+    required:
+    - description
+    - entryDate
+    - lines
+    type: object
+  journal.CreateJournalLineRequest:
+    properties:
+      accountId:
+        type: string
+      credit:
+        minimum: 0
+        type: number
+      debit:
+        minimum: 0
+        type: number
+      description:
+        maxLength: 255
+        type: string
+      partnerId:
+        type: string
+      partnerType:
+        enum:
+        - NONE
+        - CUSTOMER
+        - VENDOR
+        - EMPLOYEE
+        type: string
+    required:
+    - accountId
+    type: object
+  journal.JournalEntryLineResponse:
+    properties:
+      account:
+        $ref: '#/definitions/account.AccountResponse'
+      accountCode:
+        type: string
+      accountId:
+        type: string
+      accountName:
+        type: string
+      accountType:
+        type: string
+      credit:
+        type: number
+      debit:
+        type: number
+      description:
+        type: string
+      id:
+        type: string
+      partnerId:
+        type: string
+      partnerType:
+        type: string
+    type: object
+  journal.JournalEntryResponse:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      entryDate:
+        type: string
+      entryNumber:
+        type: string
+      id:
+        type: string
+      lines:
+        items:
+          $ref: '#/definitions/journal.JournalEntryLineResponse'
+        type: array
+      periodId:
+        type: string
+      postedBy:
+        type: string
+      postingDate:
+        type: string
+      reference:
+        type: string
+      reversalOfId:
+        type: string
+      sourceId:
+        type: string
+      sourceType:
+        type: string
+      status:
+        type: string
+      totalCredit:
+        type: number
+      totalDebit:
+        type: number
+      updatedAt:
+        type: string
+      voidReason:
+        type: string
+    type: object
+  journal.VoidJournalEntryRequest:
+    properties:
+      reason:
+        maxLength: 255
+        minLength: 3
+        type: string
+    required:
+    - reason
+    type: object
   leaverequest.CreateLeaveRequest:
     properties:
       employeeId:
@@ -217,6 +461,18 @@ definitions:
     - maxDaysPerYear
     - name
     type: object
+  pagination.PageResponse:
+    properties:
+      data: {}
+      page:
+        type: integer
+      size:
+        type: integer
+      totalItems:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   payroll.CreatePayrollPeriodRequest:
     properties:
       month:
@@ -242,6 +498,66 @@ definitions:
         description: Standard tax/insurance deduction per employee
         example: 50
         type: number
+    type: object
+  period.AccountingPeriodResponse:
+    properties:
+      createdAt:
+        type: string
+      endDate:
+        type: string
+      fiscalYearId:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      periodNumber:
+        type: integer
+      startDate:
+        type: string
+      status:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  period.CreateFiscalYearRequest:
+    properties:
+      autoCreatePeriods:
+        description: if true, creates 12 monthly accounting periods automatically
+        type: boolean
+      endDate:
+        type: string
+      name:
+        maxLength: 50
+        minLength: 2
+        type: string
+      startDate:
+        type: string
+    required:
+    - endDate
+    - name
+    - startDate
+    type: object
+  period.FiscalYearResponse:
+    properties:
+      createdAt:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: string
+      isClosed:
+        type: boolean
+      name:
+        type: string
+      periods:
+        items:
+          $ref: '#/definitions/period.AccountingPeriodResponse'
+        type: array
+      startDate:
+        type: string
+      updatedAt:
+        type: string
     type: object
   product.CreateProductRequest:
     properties:
@@ -294,6 +610,177 @@ definitions:
         type: string
       unitPrice:
         example: 1499.99
+        type: number
+    type: object
+  report.BalanceSheetResponse:
+    properties:
+      asOfDate:
+        type: string
+      currentAssets:
+        $ref: '#/definitions/report.BalanceSheetSection'
+      currentLiabilities:
+        $ref: '#/definitions/report.BalanceSheetSection'
+      currentPeriodNetIncome:
+        type: number
+      equity:
+        $ref: '#/definitions/report.BalanceSheetSection'
+      isBalanced:
+        description: TotalAssets == TotalLiabilitiesAndEquity
+        type: boolean
+      longTermLiabilities:
+        $ref: '#/definitions/report.BalanceSheetSection'
+      nonCurrentAssets:
+        $ref: '#/definitions/report.BalanceSheetSection'
+      totalAssets:
+        type: number
+      totalEquity:
+        type: number
+      totalLiabilities:
+        type: number
+      totalLiabilitiesAndEquity:
+        type: number
+    type: object
+  report.BalanceSheetSection:
+    properties:
+      category:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/report.StatementLineItem'
+        type: array
+      subtotal:
+        type: number
+    type: object
+  report.GeneralLedgerAccountReport:
+    properties:
+      accountCode:
+        type: string
+      accountId:
+        type: string
+      accountName:
+        type: string
+      accountType:
+        type: string
+      closingBalance:
+        type: number
+      normalBalance:
+        type: string
+      openingBalance:
+        type: number
+      periodCreditTotal:
+        type: number
+      periodDebitTotal:
+        type: number
+      transactions:
+        items:
+          $ref: '#/definitions/report.LedgerTransactionItem'
+        type: array
+    type: object
+  report.GeneralLedgerResponse:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/report.GeneralLedgerAccountReport'
+        type: array
+      endDate:
+        type: string
+      startDate:
+        type: string
+    type: object
+  report.LedgerTransactionItem:
+    properties:
+      credit:
+        type: number
+      date:
+        type: string
+      debit:
+        type: number
+      description:
+        type: string
+      entryNumber:
+        type: string
+      journalEntryId:
+        type: string
+      reference:
+        type: string
+      runningBalance:
+        type: number
+    type: object
+  report.ProfitAndLossResponse:
+    properties:
+      costOfGoodsSold:
+        items:
+          $ref: '#/definitions/report.StatementLineItem'
+        type: array
+      endDate:
+        type: string
+      grossProfit:
+        type: number
+      netIncome:
+        description: GrossProfit - OperatingExpenses
+        type: number
+      operatingExpenses:
+        items:
+          $ref: '#/definitions/report.StatementLineItem'
+        type: array
+      operatingRevenues:
+        items:
+          $ref: '#/definitions/report.StatementLineItem'
+        type: array
+      startDate:
+        type: string
+      totalCogs:
+        type: number
+      totalOperatingExpenses:
+        type: number
+      totalRevenue:
+        type: number
+    type: object
+  report.StatementLineItem:
+    properties:
+      accountCode:
+        type: string
+      accountName:
+        type: string
+      amount:
+        type: number
+    type: object
+  report.TrialBalanceItem:
+    properties:
+      accountCode:
+        type: string
+      accountId:
+        type: string
+      accountName:
+        type: string
+      accountType:
+        type: string
+      creditTurnover:
+        type: number
+      debitTurnover:
+        type: number
+      netCredit:
+        type: number
+      netDebit:
+        type: number
+      normalBalance:
+        type: string
+    type: object
+  report.TrialBalanceResponse:
+    properties:
+      asOfDate:
+        type: string
+      difference:
+        type: number
+      isBalanced:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/report.TrialBalanceItem'
+        type: array
+      totalCredits:
+        type: number
+      totalDebits:
         type: number
     type: object
   response.APIResponse:
@@ -390,6 +877,959 @@ info:
   title: Nova ERP API
   version: "1.0"
 paths:
+  /accounting/accounts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of accounts with optional type filter
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: size
+        type: integer
+      - default: code
+        description: Sort by field
+        in: query
+        name: sortBy
+        type: string
+      - default: asc
+        description: Sort order (asc/desc)
+        in: query
+        name: order
+        type: string
+      - description: Filter by Account Type (ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Accounts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/pagination.PageResponse'
+                  - properties:
+                      data:
+                        items:
+                          $ref: '#/definitions/account.AccountResponse'
+                        type: array
+                    type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List Chart of Accounts
+      tags:
+      - Accounting - Accounts
+    post:
+      consumes:
+      - application/json
+      description: Add a new account to the General Ledger Chart of Accounts (COA)
+      parameters:
+      - description: Account Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/account.CreateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Account created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/account.AccountResponse'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Chart of Accounts entry
+      tags:
+      - Accounting - Accounts
+  /accounting/accounts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an account (non-system accounts with no children only)
+      parameters:
+      - description: Account UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account deleted successfully
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad request / System account
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Account
+      tags:
+      - Accounting - Accounts
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single Chart of Accounts record by its UUID
+      parameters:
+      - description: Account UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/account.AccountResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Account by ID
+      tags:
+      - Accounting - Accounts
+    put:
+      consumes:
+      - application/json
+      description: Update account attributes (name, description, active status)
+      parameters:
+      - description: Account UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/account.UpdateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/account.AccountResponse'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Account
+      tags:
+      - Accounting - Accounts
+  /accounting/accounts/seed:
+    post:
+      consumes:
+      - application/json
+      description: Pre-populates standard enterprise GAAP / IFRS accounts if empty
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Standard Chart of Accounts seeded successfully
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Seed Standard Chart of Accounts
+      tags:
+      - Accounting - Accounts
+  /accounting/accounts/tree:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve parent-child nested tree structure of all accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account tree hierarchy retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/account.AccountTreeResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get COA Hierarchy Tree
+      tags:
+      - Accounting - Accounts
+  /accounting/fiscal-years:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve list of all fiscal years and child monthly periods
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fiscal years fetched successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/period.FiscalYearResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List Fiscal Years
+      tags:
+      - Accounting - Periods & Fiscal Years
+    post:
+      consumes:
+      - application/json
+      description: Register a new fiscal year with automated 12 monthly accounting
+        sub-periods
+      parameters:
+      - description: Fiscal Year Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/period.CreateFiscalYearRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Fiscal year created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/period.FiscalYearResponse'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Fiscal Year
+      tags:
+      - Accounting - Periods & Fiscal Years
+  /accounting/fiscal-years/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single fiscal year by its UUID
+      parameters:
+      - description: Fiscal Year UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fiscal year fetched successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/period.FiscalYearResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Fiscal year not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Fiscal Year by ID
+      tags:
+      - Accounting - Periods & Fiscal Years
+  /accounting/fiscal-years/{id}/close:
+    post:
+      consumes:
+      - application/json
+      description: Lock a fiscal year and freeze all child accounting periods from
+        further postings
+      parameters:
+      - description: Fiscal Year UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fiscal year closed successfully
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Fiscal year not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Close Fiscal Year
+      tags:
+      - Accounting - Periods & Fiscal Years
+  /accounting/journals:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of journal entries with date, status,
+        and source filters
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: size
+        type: integer
+      - default: entry_date
+        description: Sort by field
+        in: query
+        name: sortBy
+        type: string
+      - default: desc
+        description: Sort order (asc/desc)
+        in: query
+        name: order
+        type: string
+      - description: Filter by Status (DRAFT, POSTED, VOID)
+        in: query
+        name: status
+        type: string
+      - description: Filter by Source (MANUAL, PAYROLL, INVOICE, PAYMENT, STOCK_ADJUSTMENT)
+        in: query
+        name: sourceType
+        type: string
+      - description: Filter start date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        type: string
+      - description: Filter end date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Journal entries retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/pagination.PageResponse'
+                  - properties:
+                      data:
+                        items:
+                          $ref: '#/definitions/journal.JournalEntryResponse'
+                        type: array
+                    type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List Journal Entries
+      tags:
+      - Accounting - Journal Entries & Ledger
+    post:
+      consumes:
+      - application/json
+      description: Creates a multi-line balanced debit/credit journal transaction
+        (draft or auto-posted)
+      parameters:
+      - description: Journal Entry Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/journal.CreateJournalEntryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Journal entry created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/journal.JournalEntryResponse'
+              type: object
+        "400":
+          description: Unbalanced debits/credits or invalid line items
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Journal Entry
+      tags:
+      - Accounting - Journal Entries & Ledger
+  /accounting/journals/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a journal entry with all line items and ledger details
+      parameters:
+      - description: Journal Entry UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Journal entry fetched successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/journal.JournalEntryResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Journal entry not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Journal Entry by ID
+      tags:
+      - Accounting - Journal Entries & Ledger
+  /accounting/journals/{id}/post:
+    post:
+      consumes:
+      - application/json
+      description: Commits a draft journal entry, stamps the posting timestamp, and
+        freezes it from modification
+      parameters:
+      - description: Journal Entry UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Journal entry posted and locked
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/journal.JournalEntryResponse'
+              type: object
+        "400":
+          description: Already posted or closed period
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Journal entry not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Post Journal Entry
+      tags:
+      - Accounting - Journal Entries & Ledger
+  /accounting/journals/{id}/void:
+    post:
+      consumes:
+      - application/json
+      description: Voids a posted journal entry by creating an opposite offsetting
+        reversal entry in the ledger
+      parameters:
+      - description: Journal Entry UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Void Reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/journal.VoidJournalEntryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Journal entry voided and reversal posted
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Only posted entries can be voided
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Journal entry not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Void Journal Entry (Generate Reversal)
+      tags:
+      - Accounting - Journal Entries & Ledger
+  /accounting/periods/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single accounting period by UUID
+      parameters:
+      - description: Accounting Period UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Accounting period fetched successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/period.AccountingPeriodResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Period not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Accounting Period by ID
+      tags:
+      - Accounting - Periods & Fiscal Years
+  /accounting/periods/{id}/close:
+    post:
+      consumes:
+      - application/json
+      description: Freeze a monthly accounting period to disallow backdated postings
+      parameters:
+      - description: Accounting Period UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Period closed successfully
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Period not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Close Accounting Period
+      tags:
+      - Accounting - Periods & Fiscal Years
+  /accounting/periods/{id}/reopen:
+    post:
+      consumes:
+      - application/json
+      description: Reopen a monthly period for authorized adjustments (if fiscal year
+        is still open)
+      parameters:
+      - description: Accounting Period UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Period reopened successfully
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Cannot reopen period of closed fiscal year
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Period not found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Reopen Accounting Period
+      tags:
+      - Accounting - Periods & Fiscal Years
+  /accounting/reports/balance-sheet:
+    get:
+      consumes:
+      - application/json
+      description: Evaluates Assets = Liabilities + Equity (including current period
+        earnings) as of a specific date
+      parameters:
+      - description: As of date (YYYY-MM-DD, defaults to today)
+        in: query
+        name: asOfDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Balance sheet statement generated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.BalanceSheetResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Balance Sheet Statement
+      tags:
+      - Accounting - Financial Reports & Statements
+  /accounting/reports/general-ledger:
+    get:
+      consumes:
+      - application/json
+      description: Generates detailed running ledger with opening balance, posted
+        debits/credits, and closing balances
+      parameters:
+      - description: Filter by Account UUID (optional, defaults to all active accounts)
+        in: query
+        name: accountId
+        type: string
+      - description: Start date filter (YYYY-MM-DD)
+        in: query
+        name: startDate
+        type: string
+      - description: End date filter (YYYY-MM-DD)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: General Ledger statement generated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.GeneralLedgerResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: General Ledger Report
+      tags:
+      - Accounting - Financial Reports & Statements
+  /accounting/reports/profit-loss:
+    get:
+      consumes:
+      - application/json
+      description: Computes Total Revenues, COGS, Gross Profit, Operating Expenses,
+        and Net Income for a period
+      parameters:
+      - description: Start date (YYYY-MM-DD, defaults to start of current year)
+        in: query
+        name: startDate
+        type: string
+      - description: End date (YYYY-MM-DD, defaults to today)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profit and Loss statement generated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.ProfitAndLossResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Profit and Loss (Income Statement)
+      tags:
+      - Accounting - Financial Reports & Statements
+  /accounting/reports/trial-balance:
+    get:
+      consumes:
+      - application/json
+      description: Verifies ledger debit and credit turnover equality and net balances
+        across all accounts
+      parameters:
+      - description: As of date filter (YYYY-MM-DD, defaults to today)
+        in: query
+        name: asOfDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Trial Balance statement generated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.TrialBalanceResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Trial Balance Statement
+      tags:
+      - Accounting - Financial Reports & Statements
   /auth/login:
     post:
       consumes:
