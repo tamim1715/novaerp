@@ -15,6 +15,11 @@ NovaERP is a high-performance, modular monolithic Enterprise Resource Planning (
 
 * 🔐 **RS256 JWT Authentication & Token Rotation**: Asymmetric RSA 2048-bit key signing for access tokens alongside database-persisted refresh tokens with cryptographic rotation.
 * 📦 **Modular Inventory System**: Submodules for **Products**, **Warehouses**, and **Stocks** with row-level locked transactional stock adjustments.
+* 💰 **Financial & Accounting Management Engine**:
+  * **Chart of Accounts (COA)**: Hierarchical account classification (Assets, Liabilities, Equity, Revenue, Expense) with parent-child tree view and automatic GAAP/IFRS seeding.
+  * **Fiscal Years & Accounting Periods**: 12-month automated financial sub-periods with period-closing and reopening controls.
+  * **Double-Entry General Ledger**: Balanced debit/credit journal transactions with strict immutability, atomic posting, and auto-generated reversal entries.
+  * **Financial Statements Engine**: Real-time **General Ledger**, **Trial Balance**, **Profit & Loss (Income Statement)**, and **Balance Sheet** reports.
 * 👥 **Comprehensive HR & Payroll Engine**:
   * **Leave Management**: Submodules for **Leave Types** (Casual, Sick, Annual) and **Leave Applications & Approval Workflows**.
   * **Attendance System**: Daily **Check-In/Check-Out** with automated work-hour calculations, late-arrival tagging, and overtime tracking.
@@ -172,6 +177,25 @@ make swagger
 * `POST /api/v1/hr/payrolls` — Create Monthly Payroll Batch
 * `POST /api/v1/hr/payrolls/:id/process` — Process Salary Slips
 * `GET /api/v1/hr/payrolls/:id/payslips` — View Generated Payslips
+
+### 💰 Financial & Accounting Core *(Protected)*
+* `GET | POST /api/v1/accounting/accounts` — Chart of Accounts (COA) List & Creation
+* `GET /api/v1/accounting/accounts/tree` — Hierarchical Parent-Child Account Tree
+* `POST /api/v1/accounting/accounts/seed` — Seed Standard GAAP/IFRS Chart of Accounts
+* `GET | PUT | DELETE /api/v1/accounting/accounts/:id` — Account Detail, Update & Safe Delete
+* `POST /api/v1/accounting/fiscal-years` — Create Fiscal Year (with optional auto-12 monthly sub-periods)
+* `GET /api/v1/accounting/fiscal-years` — List Fiscal Years & Monthly Sub-Periods
+* `POST /api/v1/accounting/fiscal-years/:id/close` — Close Fiscal Year & Lock all periods
+* `POST /api/v1/accounting/periods/:id/close` — Close Monthly Accounting Period
+* `POST /api/v1/accounting/periods/:id/reopen` — Reopen Accounting Period
+* `GET | POST /api/v1/accounting/journals` — List Journal Entries & Create Double-Entry Transaction
+* `GET /api/v1/accounting/journals/:id` — Journal Entry Details & Line Items
+* `POST /api/v1/accounting/journals/:id/post` — Post & Freeze Journal Entry to General Ledger
+* `POST /api/v1/accounting/journals/:id/void` — Void Posted Journal Entry (Creates Auto-Reversal Entry)
+* `GET /api/v1/accounting/reports/general-ledger` — Running General Ledger Statement
+* `GET /api/v1/accounting/reports/trial-balance` — Trial Balance Debit/Credit Equality Verification
+* `GET /api/v1/accounting/reports/profit-loss` — Profit & Loss / Income Statement (Revenue, COGS, Net Income)
+* `GET /api/v1/accounting/reports/balance-sheet` — Balance Sheet Statement (Assets = Liabilities + Equity)
 
 ---
 
