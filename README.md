@@ -159,49 +159,83 @@ make swagger
 
 ## 📡 API Endpoint Overview
 
-### 🔑 Authentication
+### 🏥 System & Health *(Public)*
+* `GET /` — Service status check / welcome endpoint
+* `GET /health` — Service & PostgreSQL database health check
+* `GET /swagger/*any` — Interactive Swagger UI / OpenAPI documentation
+
+### 🔑 Authentication *(Public)*
 * `POST /api/v1/auth/login` — User authentication (returns RS256 Access Token + Refresh Token)
 * `POST /api/v1/auth/refresh` — Exchange refresh token for new access token
 * `POST /api/v1/auth/logout` — Revoke refresh token
 
-### 👤 User & Organization Management *(Protected)*
-* `GET | POST /api/v1/users` — User Accounts & Roles
-* `GET | POST /api/v1/departments` — Company Departments
-* `GET | POST /api/v1/employees` — Employee Directory
+### 👤 User Management
+* `GET | POST /api/v1/users` — List paginated users / Register a new user account
+* `GET | PUT | DELETE /api/v1/users/:id` — Retrieve user profile, update account & roles, delete user
+
+### 🏢 Department Management *(Protected)*
+* `GET | POST /api/v1/departments` — List paginated departments / Create a department
+* `GET | PUT | DELETE /api/v1/departments/:id` — Retrieve department details, update department, delete department
+
+### 👨‍💼 Employee Directory *(Protected)*
+* `GET | POST /api/v1/employees` — List paginated employees / Onboard a new employee
+* `GET | PUT | DELETE /api/v1/employees/:id` — Retrieve employee profile, update employee info & status, delete employee
 
 ### 📦 Inventory Management *(Protected)*
-* `GET | POST /api/v1/inventories/products` — Product Catalog & SKUs
-* `GET | POST /api/v1/inventories/warehouses` — Storage Warehouses
-* `GET | POST /api/v1/inventories/stocks` — Inventory Balances
-* `POST /api/v1/inventories/stocks/adjust` — Transactional Stock Adjustment
+* `GET | POST /api/v1/inventories/products` — List paginated products / Create product & SKU
+* `GET | PUT | DELETE /api/v1/inventories/products/:id` — Retrieve product details, update product, delete product
+* `GET | POST /api/v1/inventories/warehouses` — List paginated warehouses / Create storage warehouse
+* `GET | PUT | DELETE /api/v1/inventories/warehouses/:id` — Retrieve warehouse details, update warehouse, delete warehouse
+* `GET /api/v1/inventories/stocks` — List paginated inventory stock balances across warehouses
+* `POST /api/v1/inventories/stocks/adjust` — Transactional stock adjustment (`IN`, `OUT`, `ADJUST` with row locking)
 
 ### 👥 HR & Payroll *(Protected)*
-* `GET | POST /api/v1/hr/leaves/types` — Leave Categories
-* `GET | POST /api/v1/hr/leaves/requests` — Leave Applications & Approvals
-* `POST /api/v1/hr/attendances/check-in` — Shift Check-In
-* `POST /api/v1/hr/attendances/check-out` — Shift Check-Out & Overtime Calculation
-* `POST /api/v1/hr/payrolls` — Create Monthly Payroll Batch
-* `POST /api/v1/hr/payrolls/:id/process` — Process Salary Slips
-* `GET /api/v1/hr/payrolls/:id/payslips` — View Generated Payslips
+#### 🌴 Leave Management
+* `GET | POST /api/v1/hr/leaves/types` — List leave type policies / Create leave category
+* `GET | PUT | DELETE /api/v1/hr/leaves/types/:id` — Retrieve leave type details, update policy, delete leave category
+* `GET | POST /api/v1/hr/leaves/requests` — List leave applications / Submit employee leave request
+* `GET /api/v1/hr/leaves/requests/:id` — Retrieve leave application details by ID
+* `PUT /api/v1/hr/leaves/requests/:id/status` — Approve or reject leave application (`APPROVED`, `REJECTED`)
+
+#### ⏱️ Attendance System
+* `POST /api/v1/hr/attendances/check-in` — Employee shift check-in (auto timestamp & status)
+* `POST /api/v1/hr/attendances/check-out` — Employee shift check-out & automated work/overtime calculation
+* `GET | POST /api/v1/hr/attendances` — List paginated attendance records / Record manual attendance entry
+* `GET /api/v1/hr/attendances/:id` — Retrieve attendance record by ID
+
+#### 💵 Payroll Processing
+* `GET | POST /api/v1/hr/payrolls` — List paginated payroll batches / Create monthly payroll period
+* `GET /api/v1/hr/payrolls/:id` — Retrieve payroll batch details by ID
+* `POST /api/v1/hr/payrolls/:id/process` — Process and calculate salary slips for active employees
+* `GET /api/v1/hr/payrolls/:id/payslips` — View generated employee payslips
+* `POST /api/v1/hr/payrolls/:id/pay` — Mark payroll batch as paid and finalize status
 
 ### 💰 Financial & Accounting Core *(Protected)*
-* `GET | POST /api/v1/accounting/accounts` — Chart of Accounts (COA) List & Creation
-* `GET /api/v1/accounting/accounts/tree` — Hierarchical Parent-Child Account Tree
-* `POST /api/v1/accounting/accounts/seed` — Seed Standard GAAP/IFRS Chart of Accounts
-* `GET | PUT | DELETE /api/v1/accounting/accounts/:id` — Account Detail, Update & Safe Delete
-* `POST /api/v1/accounting/fiscal-years` — Create Fiscal Year (with optional auto-12 monthly sub-periods)
-* `GET /api/v1/accounting/fiscal-years` — List Fiscal Years & Monthly Sub-Periods
-* `POST /api/v1/accounting/fiscal-years/:id/close` — Close Fiscal Year & Lock all periods
-* `POST /api/v1/accounting/periods/:id/close` — Close Monthly Accounting Period
-* `POST /api/v1/accounting/periods/:id/reopen` — Reopen Accounting Period
-* `GET | POST /api/v1/accounting/journals` — List Journal Entries & Create Double-Entry Transaction
-* `GET /api/v1/accounting/journals/:id` — Journal Entry Details & Line Items
-* `POST /api/v1/accounting/journals/:id/post` — Post & Freeze Journal Entry to General Ledger
-* `POST /api/v1/accounting/journals/:id/void` — Void Posted Journal Entry (Creates Auto-Reversal Entry)
-* `GET /api/v1/accounting/reports/general-ledger` — Running General Ledger Statement
-* `GET /api/v1/accounting/reports/trial-balance` — Trial Balance Debit/Credit Equality Verification
-* `GET /api/v1/accounting/reports/profit-loss` — Profit & Loss / Income Statement (Revenue, COGS, Net Income)
-* `GET /api/v1/accounting/reports/balance-sheet` — Balance Sheet Statement (Assets = Liabilities + Equity)
+#### 📊 Chart of Accounts (COA)
+* `GET | POST /api/v1/accounting/accounts` — Chart of Accounts (COA) list & create account
+* `GET /api/v1/accounting/accounts/tree` — Hierarchical parent-child account tree structure
+* `POST /api/v1/accounting/accounts/seed` — Seed standard GAAP/IFRS Chart of Accounts
+* `GET | PUT | DELETE /api/v1/accounting/accounts/:id` — Retrieve account details, update account, safe delete account
+
+#### 📅 Fiscal Years & Accounting Periods
+* `GET | POST /api/v1/accounting/fiscal-years` — List fiscal years & sub-periods / Create fiscal year (with optional 12 monthly sub-periods)
+* `GET /api/v1/accounting/fiscal-years/:id` — Retrieve fiscal year details & associated monthly accounting periods
+* `POST /api/v1/accounting/fiscal-years/:id/close` — Close fiscal year & lock all sub-periods
+* `GET /api/v1/accounting/periods/:id` — Retrieve monthly accounting period details by ID
+* `POST /api/v1/accounting/periods/:id/close` — Close monthly accounting period
+* `POST /api/v1/accounting/periods/:id/reopen` — Reopen closed accounting period
+
+#### 📖 General Ledger & Journal Entries
+* `GET | POST /api/v1/accounting/journals` — List paginated journal entries / Create balanced double-entry transaction
+* `GET /api/v1/accounting/journals/:id` — Retrieve journal entry details and line items (debits/credits)
+* `POST /api/v1/accounting/journals/:id/post` — Post & freeze journal entry to General Ledger
+* `POST /api/v1/accounting/journals/:id/void` — Void posted journal entry (generates automated reversal entry)
+
+#### 📈 Financial Statements & Reports
+* `GET /api/v1/accounting/reports/general-ledger` — Running General Ledger statement with running balances
+* `GET /api/v1/accounting/reports/trial-balance` — Trial Balance debit/credit equality verification report
+* `GET /api/v1/accounting/reports/profit-loss` — Profit & Loss / Income Statement (Revenue, COGS, Gross Profit, Expenses, Net Income)
+* `GET /api/v1/accounting/reports/balance-sheet` — Balance Sheet statement (Assets = Liabilities + Equity)
 
 ---
 
