@@ -5,15 +5,18 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/tamim1715/novaerp/internal/common/model"
+	"github.com/tamim1715/novaerp/internal/enums"
 	"github.com/tamim1715/novaerp/internal/modules/accounting/account"
 	"github.com/tamim1715/novaerp/internal/modules/accounting/period"
 )
 
 // Journal status lifecycle
+type Status = enums.Status
+
 const (
-	StatusDraft  = "DRAFT"
-	StatusPosted = "POSTED"
-	StatusVoid   = "VOID"
+	StatusDraft  = enums.StatusDraft
+	StatusPosted = enums.StatusPosted
+	StatusVoid   = enums.StatusVoid
 )
 
 // Source types generating journal transactions
@@ -38,22 +41,22 @@ const (
 type JournalEntry struct {
 	model.BaseModel
 
-	EntryNumber  string     `gorm:"size:50;uniqueIndex;not null" json:"entryNumber"`
-	EntryDate    time.Time  `gorm:"type:date;not null" json:"entryDate"`
-	PostingDate  *time.Time `gorm:"type:timestamp" json:"postingDate,omitempty"`
-	PeriodID     *uuid.UUID `gorm:"type:uuid;index" json:"periodId,omitempty"`
-	Reference    string     `gorm:"size:100" json:"reference"`
-	SourceType   string     `gorm:"size:50;default:'MANUAL';not null" json:"sourceType"`
-	SourceID     *uuid.UUID `gorm:"type:uuid;index" json:"sourceId,omitempty"`
-	Description  string     `gorm:"size:255;not null" json:"description"`
-	Status       string     `gorm:"size:20;default:'DRAFT';not null;index" json:"status"` // DRAFT, POSTED, VOID
-	TotalDebit   float64    `gorm:"type:numeric(14,2);default:0;not null" json:"totalDebit"`
-	TotalCredit  float64    `gorm:"type:numeric(14,2);default:0;not null" json:"totalCredit"`
-	PostedBy     *uuid.UUID `gorm:"type:uuid" json:"postedBy,omitempty"`
-	VoidReason   string     `gorm:"size:255" json:"voidReason,omitempty"`
-	ReversalOfID *uuid.UUID `gorm:"type:uuid" json:"reversalOfId,omitempty"`
+	EntryNumber  string       `gorm:"size:50;uniqueIndex;not null" json:"entryNumber"`
+	EntryDate    time.Time    `gorm:"type:date;not null" json:"entryDate"`
+	PostingDate  *time.Time   `gorm:"type:timestamp" json:"postingDate,omitempty"`
+	PeriodID     *uuid.UUID   `gorm:"type:uuid;index" json:"periodId,omitempty"`
+	Reference    string       `gorm:"size:100" json:"reference"`
+	SourceType   string       `gorm:"size:50;default:'MANUAL';not null" json:"sourceType"`
+	SourceID     *uuid.UUID   `gorm:"type:uuid;index" json:"sourceId,omitempty"`
+	Description  string       `gorm:"size:255;not null" json:"description"`
+	Status       enums.Status `gorm:"size:20;default:'DRAFT';not null;index" json:"status"` // DRAFT, POSTED, VOID
+	TotalDebit   float64      `gorm:"type:numeric(14,2);default:0;not null" json:"totalDebit"`
+	TotalCredit  float64      `gorm:"type:numeric(14,2);default:0;not null" json:"totalCredit"`
+	PostedBy     *uuid.UUID   `gorm:"type:uuid" json:"postedBy,omitempty"`
+	VoidReason   string       `gorm:"size:255" json:"voidReason,omitempty"`
+	ReversalOfID *uuid.UUID   `gorm:"type:uuid" json:"reversalOfId,omitempty"`
 
-	Lines  []JournalEntryLine      `gorm:"foreignKey:JournalEntryID;constraint:OnDelete:CASCADE" json:"lines,omitempty"`
+	Lines  []JournalEntryLine       `gorm:"foreignKey:JournalEntryID;constraint:OnDelete:CASCADE" json:"lines,omitempty"`
 	Period *period.AccountingPeriod `gorm:"foreignKey:PeriodID" json:"period,omitempty"`
 }
 

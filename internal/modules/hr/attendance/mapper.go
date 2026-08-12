@@ -7,7 +7,7 @@ func ToAttendanceResponse(a *Attendance) AttendanceResponse {
 		Date:          a.Date.Format("2006-01-02"),
 		WorkHours:     a.WorkHours,
 		OvertimeHours: a.OvertimeHours,
-		Status:        a.Status,
+		Status:        a.Status.String(),
 		Notes:         a.Notes,
 		CreatedAt:     a.CreatedAt.Unix(),
 	}

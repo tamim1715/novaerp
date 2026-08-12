@@ -10,7 +10,7 @@ func ToResponse(employee *Employee) EmployeeResponse {
 		Designation:  employee.Designation,
 		JoiningDate:  employee.JoiningDate.String(),
 		Salary:       employee.Salary,
-		Status:       employee.Status,
+		Status:       employee.Status.String(),
 		DepartmentID: employee.DepartmentID,
 		CreatedAt:    employee.CreatedAt.Unix(),
 	}

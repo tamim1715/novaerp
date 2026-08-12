@@ -7,7 +7,7 @@ func ToPayrollPeriodResponse(p *PayrollPeriod) PayrollPeriodResponse {
 		Year:       p.Year,
 		StartDate:  p.StartDate.Format("2006-01-02"),
 		EndDate:    p.EndDate.Format("2006-01-02"),
-		Status:     p.Status,
+		Status:     p.Status.String(),
 		TotalGross: p.TotalGross,
 		TotalNet:   p.TotalNet,
 		CreatedAt:  p.CreatedAt.Unix(),
@@ -30,18 +30,18 @@ func ToPayrollPeriodResponseList(list []PayrollPeriod) []PayrollPeriodResponse {
 
 func ToPayslipResponse(ps *Payslip) PayslipResponse {
 	resp := PayslipResponse{
-		ID:                  ps.ID.String(),
-		PayrollPeriodID:     ps.PayrollPeriodID.String(),
-		EmployeeID:          ps.EmployeeID.String(),
-		BasicSalary:         ps.BasicSalary,
-		Allowances:          ps.Allowances,
-		Deductions:          ps.Deductions,
+		ID:                   ps.ID.String(),
+		PayrollPeriodID:      ps.PayrollPeriodID.String(),
+		EmployeeID:           ps.EmployeeID.String(),
+		BasicSalary:          ps.BasicSalary,
+		Allowances:           ps.Allowances,
+		Deductions:           ps.Deductions,
 		UnpaidLeaveDeduction: ps.UnpaidLeaveDeduction,
-		GrossSalary:         ps.GrossSalary,
-		NetSalary:           ps.NetSalary,
-		Status:              ps.Status,
-		Notes:               ps.Notes,
-		CreatedAt:           ps.CreatedAt.Unix(),
+		GrossSalary:          ps.GrossSalary,
+		NetSalary:            ps.NetSalary,
+		Status:               ps.Status.String(),
+		Notes:                ps.Notes,
+		CreatedAt:            ps.CreatedAt.Unix(),
 	}
 
 	if ps.PaymentDate != nil {

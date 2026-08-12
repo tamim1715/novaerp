@@ -48,8 +48,9 @@ func (s *service) Create(ctx context.Context, req CreateEmployeeRequest) (*Emplo
 		joinDate = time.Now()
 	}
 
-	if req.Status == "" {
-		req.Status = "active"
+	status := Status(req.Status)
+	if status == "" {
+		status = StatusActive
 	}
 
 	employee := &Employee{
@@ -61,7 +62,7 @@ func (s *service) Create(ctx context.Context, req CreateEmployeeRequest) (*Emplo
 		Designation:  req.Designation,
 		JoiningDate:  joinDate,
 		Salary:       req.Salary,
-		Status:       req.Status,
+		Status:       status,
 	}
 
 	if err := s.repository.Create(ctx, employee); err != nil {
@@ -117,7 +118,7 @@ func (s *service) Update(ctx context.Context, id string, req UpdateEmployeeReque
 		employee.Salary = req.Salary
 	}
 	if req.Status != "" {
-		employee.Status = req.Status
+		employee.Status = Status(req.Status)
 	}
 
 	if err := s.repository.Update(ctx, employee); err != nil {

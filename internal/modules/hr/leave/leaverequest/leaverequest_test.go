@@ -21,7 +21,7 @@ func TestToLeaveRequestResponse(t *testing.T) {
 		EndDate:     now.AddDate(0, 0, 2),
 		TotalDays:   3,
 		Reason:      "Vacation",
-		Status:      "PENDING",
+		Status:      StatusPending,
 		Employee:    employee.Employee{FirstName: "Alex", LastName: "Morgan"},
 		LeaveType:   leavetype.LeaveType{Name: "Annual Leave"},
 	}

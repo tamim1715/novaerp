@@ -4,7 +4,17 @@ import (
 	"time"
 
 	"github.com/tamim1715/novaerp/internal/common/model"
+	"github.com/tamim1715/novaerp/internal/enums"
 	"github.com/tamim1715/novaerp/internal/modules/department"
+)
+
+type Status = enums.Status
+
+const (
+	StatusActive     = enums.StatusActive
+	StatusInactive   = enums.StatusInactive
+	StatusTerminated = enums.StatusTerminated
+	StatusOnLeave    = enums.StatusOnLeave
 )
 
 type Employee struct {
@@ -26,7 +36,7 @@ type Employee struct {
 
 	Salary float64 `gorm:"type:numeric(12,2)"`
 
-	Status string `gorm:"default:'active'"`
+	Status enums.Status `gorm:"default:'active'"`
 
 	Department department.Department `gorm:"foreignKey:DepartmentID"`
 }

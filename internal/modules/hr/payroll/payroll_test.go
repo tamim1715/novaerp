@@ -19,7 +19,7 @@ func TestToPayslipResponse(t *testing.T) {
 		Deductions:      100.00,
 		GrossSalary:     3200.00,
 		NetSalary:       3100.00,
-		Status:          "DRAFT",
+		Status:          StatusDraft,
 		Employee:        employee.Employee{FirstName: "Jane", LastName: "Smith", Designation: "Engineer"},
 	}
 

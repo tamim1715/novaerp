@@ -9,7 +9,7 @@ func ToLeaveRequestResponse(lr *LeaveRequest) LeaveRequestResponse {
 		EndDate:     lr.EndDate.Format("2006-01-02"),
 		TotalDays:   lr.TotalDays,
 		Reason:      lr.Reason,
-		Status:      lr.Status,
+		Status:      lr.Status.String(),
 		Remarks:     lr.Remarks,
 		CreatedAt:   lr.CreatedAt.Unix(),
 	}

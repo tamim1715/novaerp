@@ -51,7 +51,7 @@ func (s *service) CreatePeriod(ctx context.Context, req CreatePayrollPeriodReque
 		Year:       req.Year,
 		StartDate:  startDate,
 		EndDate:    endDate,
-		Status:     "DRAFT",
+		Status:     StatusDraft,
 		TotalGross: 0,
 		TotalNet:   0,
 	}
@@ -69,7 +69,7 @@ func (s *service) ProcessPayroll(ctx context.Context, periodID string, req Proce
 		return nil, err
 	}
 
-	if period.Status == "PAID" {
+	if period.Status == StatusPaid {
 		return nil, errors.New("cannot process an already paid payroll period")
 	}
 
@@ -109,7 +109,7 @@ func (s *service) ProcessPayroll(ctx context.Context, periodID string, req Proce
 			UnpaidLeaveDeduction: unpaidDeduction,
 			GrossSalary:          gross,
 			NetSalary:            net,
-			Status:               "DRAFT",
+			Status:               StatusDraft,
 		})
 
 		totalGross += gross
@@ -122,7 +122,7 @@ func (s *service) ProcessPayroll(ctx context.Context, periodID string, req Proce
 	}
 
 	now := time.Now()
-	period.Status = "PROCESSING"
+	period.Status = StatusProcessing
 	period.TotalGross = totalGross
 	period.TotalNet = totalNet
 	period.ProcessedAt = &now
@@ -152,12 +152,12 @@ func (s *service) MarkPaid(ctx context.Context, periodID string) (*PayrollPeriod
 		return nil, err
 	}
 
-	if period.Status == "PAID" {
+	if period.Status == StatusPaid {
 		return period, nil
 	}
 
 	now := time.Now()
-	period.Status = "PAID"
+	period.Status = StatusPaid
 
 	if err := s.repo.UpdatePeriod(ctx, period); err != nil {
 		return nil, err
@@ -166,7 +166,7 @@ func (s *service) MarkPaid(ctx context.Context, periodID string) (*PayrollPeriod
 	payslips, err := s.repo.FindPayslipsByPeriodID(ctx, periodID)
 	if err == nil {
 		for i := range payslips {
-			payslips[i].Status = "PAID"
+			payslips[i].Status = StatusPaid
 			payslips[i].PaymentDate = &now
 			_ = s.repo.UpdatePayslip(ctx, &payslips[i])
 		}

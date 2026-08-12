@@ -18,7 +18,7 @@ func TestToAttendanceResponse(t *testing.T) {
 		CheckIn:       &now,
 		WorkHours:     8.5,
 		OvertimeHours: 0.5,
-		Status:        "PRESENT",
+		Status:        StatusPresent,
 		Employee:      employee.Employee{FirstName: "John", LastName: "Doe"},
 	}
 

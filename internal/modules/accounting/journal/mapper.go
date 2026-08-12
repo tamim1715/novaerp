@@ -49,7 +49,7 @@ func ToJournalEntryResponse(e *JournalEntry) JournalEntryResponse {
 		SourceType:   e.SourceType,
 		SourceID:     e.SourceID,
 		Description:  e.Description,
-		Status:       e.Status,
+		Status:       e.Status.String(),
 		TotalDebit:   e.TotalDebit,
 		TotalCredit:  e.TotalCredit,
 		PostedBy:     e.PostedBy,

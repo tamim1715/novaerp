@@ -11,7 +11,7 @@ func ToAccountingPeriodResponse(p *AccountingPeriod) AccountingPeriodResponse {
 		Name:         p.Name,
 		StartDate:    p.StartDate,
 		EndDate:      p.EndDate,
-		Status:       p.Status,
+		Status:       p.Status.String(),
 		CreatedAt:    p.CreatedAt,
 		UpdatedAt:    p.UpdatedAt,
 	}

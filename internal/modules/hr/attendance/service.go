@@ -67,10 +67,10 @@ func (s *service) CheckIn(ctx context.Context, req CheckInRequest) (*Attendance,
 		return nil, err
 	}
 
-	status := "PRESENT"
+	status := StatusPresent
 	// If check in after 09:30 AM local time, mark as LATE
 	if localNow.Hour() > 9 || (localNow.Hour() == 9 && localNow.Minute() > 30) {
-		status = "LATE"
+		status = StatusLate
 	}
 
 	att = &Attendance{
@@ -154,9 +154,9 @@ func (s *service) CreateAttendance(ctx context.Context, req CreateAttendanceRequ
 		return nil, errors.New("invalid date format (use YYYY-MM-DD)")
 	}
 
-	status := req.Status
+	status := Status(req.Status)
 	if status == "" {
-		status = "PRESENT"
+		status = StatusPresent
 	}
 
 	att := &Attendance{

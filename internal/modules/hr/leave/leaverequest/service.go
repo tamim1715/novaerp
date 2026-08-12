@@ -80,7 +80,7 @@ func (s *service) CreateLeaveRequest(ctx context.Context, req CreateLeaveRequest
 		EndDate:     endDate,
 		TotalDays:   totalDays,
 		Reason:      req.Reason,
-		Status:      "PENDING",
+		Status:      StatusPending,
 	}
 
 	if err := s.repo.Create(ctx, lr); err != nil {
@@ -104,7 +104,7 @@ func (s *service) UpdateLeaveStatus(ctx context.Context, id string, req UpdateLe
 		return nil, err
 	}
 
-	lr.Status = req.Status
+	lr.Status = Status(req.Status)
 	lr.Remarks = req.Remarks
 
 	if req.ApprovedBy != "" {
