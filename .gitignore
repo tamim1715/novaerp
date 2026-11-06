@@ -8,8 +8,9 @@ tmp
 
 vendor
 
+# Binaries
+main
+novaerp
 *.exe
-
 *.out
-
 *.log
