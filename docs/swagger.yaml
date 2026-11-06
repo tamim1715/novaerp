@@ -111,6 +111,49 @@ definitions:
       parentId:
         type: string
     type: object
+  allowance.AssignAllowanceRequest:
+    properties:
+      allowanceTypeId:
+        example: 5e53303c-8ab5-46eb-a1f9-9ea2eb60b37f
+        type: string
+      amount:
+        description: Specific override amount; if 0, type default is used
+        example: 500
+        type: number
+      employeeId:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+    required:
+    - allowanceTypeId
+    - employeeId
+    type: object
+  allowance.CreateAllowanceTypeRequest:
+    properties:
+      calculationType:
+        description: FIXED or PERCENTAGE
+        example: PERCENTAGE
+        type: string
+      code:
+        example: HRA
+        type: string
+      defaultAmount:
+        description: 40% if PERCENTAGE, or flat amount if FIXED
+        example: 40
+        type: number
+      description:
+        example: Monthly housing allowance
+        type: string
+      isTaxable:
+        example: false
+        type: boolean
+      name:
+        example: House Rent Allowance
+        type: string
+    required:
+    - calculationType
+    - code
+    - name
+    type: object
   attendance.CheckInRequest:
     properties:
       employeeId:
@@ -132,6 +175,17 @@ definitions:
         type: string
     required:
     - employeeId
+    type: object
+  attendance.ProcessDailyAttendanceRequest:
+    properties:
+      date:
+        example: "2026-08-06"
+        type: string
+      departmentId:
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        type: string
+    required:
+    - date
     type: object
   auth.LoginRequest:
     properties:
@@ -461,6 +515,39 @@ definitions:
     - maxDaysPerYear
     - name
     type: object
+  overtime.CreateOvertimePolicyRequest:
+    properties:
+      code:
+        example: OT_STD
+        type: string
+      description:
+        example: Standard corporate OT policy
+        type: string
+      holidayRateMultiplier:
+        example: 2
+        type: number
+      isDefault:
+        example: true
+        type: boolean
+      maxOvertimeHoursPerDay:
+        example: 4
+        type: number
+      minOvertimeMinutes:
+        example: 30
+        type: integer
+      name:
+        example: Standard Overtime Policy
+        type: string
+      weekdayRateMultiplier:
+        example: 1.5
+        type: number
+      weekendRateMultiplier:
+        example: 2
+        type: number
+    required:
+    - code
+    - name
+    type: object
   pagination.PageResponse:
     properties:
       data: {}
@@ -491,9 +578,13 @@ definitions:
   payroll.ProcessPayrollRequest:
     properties:
       allowancesDefault:
-        description: Standard bonus/allowance per employee
-        example: 200
+        description: Fallback allowance if none configured
+        example: 0
         type: number
+      considerAttendance:
+        description: Calculate salary from attendance, overtime & leaves
+        example: true
+        type: boolean
       deductionsDefault:
         description: Standard tax/insurance deduction per employee
         example: 50
@@ -790,6 +881,60 @@ definitions:
         type: string
       success:
         type: boolean
+    type: object
+  shift.AssignShiftRequest:
+    properties:
+      effectiveFrom:
+        example: "2026-08-01"
+        type: string
+      effectiveTo:
+        example: "2026-12-31"
+        type: string
+      employeeId:
+        example: 3f393bbd-9790-4045-853e-26a2c732ee06
+        type: string
+      shiftId:
+        example: 5e53303c-8ab5-46eb-a1f9-9ea2eb60b37f
+        type: string
+    required:
+    - effectiveFrom
+    - employeeId
+    - shiftId
+    type: object
+  shift.CreateShiftRequest:
+    properties:
+      code:
+        example: GEN_MORN
+        type: string
+      description:
+        example: Default corporate morning shift
+        type: string
+      endTime:
+        example: "17:00"
+        type: string
+      gracePeriodMinutes:
+        example: 15
+        type: integer
+      halfDayHours:
+        example: 4
+        type: number
+      isNightShift:
+        example: false
+        type: boolean
+      name:
+        example: General Morning Shift
+        type: string
+      startTime:
+        example: "09:00"
+        type: string
+      workHours:
+        example: 8
+        type: number
+    required:
+    - code
+    - endTime
+    - name
+    - startTime
     type: object
   stock.AdjustStockRequest:
     properties:
@@ -2216,6 +2361,77 @@ paths:
       summary: Update Employee
       tags:
       - Employee
+  /hr/allowances/assign:
+    post:
+      consumes:
+      - application/json
+      description: Allocate fixed or percentage allowance to an employee
+      parameters:
+      - description: Allowance assignment payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/allowance.AssignAllowanceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Assign allowance to employee
+      tags:
+      - Allowance
+  /hr/allowances/types:
+    get:
+      description: Retrieve allowance types with pagination
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List allowance types
+      tags:
+      - Allowance
+    post:
+      consumes:
+      - application/json
+      description: Configure an allowance type (e.g. HRA, Medical) with fixed amount
+        or percentage of basic
+      parameters:
+      - description: Allowance type payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/allowance.CreateAllowanceTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create an allowance type
+      tags:
+      - Allowance
   /hr/attendances:
     get:
       description: Retrieve daily attendance records with pagination
@@ -2285,6 +2501,34 @@ paths:
       security:
       - BearerAuth: []
       summary: Record employee check-out
+      tags:
+      - Attendance
+  /hr/attendances/process:
+    post:
+      consumes:
+      - application/json
+      description: Evaluates clock-ins against shifts, marks absents and leaves automatically
+      parameters:
+      - description: Process payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/attendance.ProcessDailyAttendanceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Run daily attendance process
       tags:
       - Attendance
   /hr/leaves/requests:
@@ -2398,6 +2642,48 @@ paths:
       summary: Create a leave type
       tags:
       - Leave Types
+  /hr/overtimes:
+    get:
+      description: Retrieve overtime policies with pagination
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List overtime policies
+      tags:
+      - Overtime
+    post:
+      consumes:
+      - application/json
+      description: Configure overtime thresholds, daily maximums, and rate multipliers
+      parameters:
+      - description: Overtime policy payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/overtime.CreateOvertimePolicyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create an overtime policy
+      tags:
+      - Overtime
   /hr/payrolls:
     post:
       consumes:
@@ -2484,6 +2770,77 @@ paths:
       summary: Process monthly payroll
       tags:
       - Payroll
+  /hr/shifts:
+    get:
+      description: Retrieve work shifts with pagination
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List work shifts
+      tags:
+      - Shift
+    post:
+      consumes:
+      - application/json
+      description: Configure a work shift with start/end time, grace period, and work
+        hours
+      parameters:
+      - description: Shift configuration payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shift.CreateShiftRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a work shift configuration
+      tags:
+      - Shift
+  /hr/shifts/assign:
+    post:
+      consumes:
+      - application/json
+      description: Assign work shift with effective dates to an employee
+      parameters:
+      - description: Shift assignment payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shift.AssignShiftRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Assign a shift to an employee
+      tags:
+      - Shift
   /inventories/products:
     get:
       description: Retrieve products with pagination, sorting, and search

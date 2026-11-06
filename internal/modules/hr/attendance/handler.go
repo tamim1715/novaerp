@@ -4,8 +4,10 @@ import (
 	"errors"
 	"math"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"github.com/tamim1715/novaerp/internal/common/response"
 	"gorm.io/gorm"
@@ -105,4 +107,52 @@ func (h *Handler) FindByID(c *gin.Context) {
 	}
 
 	response.Success(c, "Attendance record fetched successfully", ToAttendanceResponse(att))
+}
+
+func (h *Handler) ProcessDaily(c *gin.Context) {
+	var req ProcessDailyAttendanceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	result, err := h.service.ProcessDailyAttendance(c.Request.Context(), req)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	response.Success(c, "Daily attendance processed successfully", result)
+}
+
+func (h *Handler) GetSummary(c *gin.Context) {
+	employeeIDStr := c.Query("employeeId")
+	startDateStr := c.Query("startDate")
+	endDateStr := c.Query("endDate")
+
+	empID, err := uuid.Parse(employeeIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid employeeId format")
+		return
+	}
+
+	startDate, err := time.Parse("2006-01-02", startDateStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid startDate (use YYYY-MM-DD)")
+		return
+	}
+
+	endDate, err := time.Parse("2006-01-02", endDateStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid endDate (use YYYY-MM-DD)")
+		return
+	}
+
+	summary, err := h.service.GetMonthlySummary(c.Request.Context(), empID, startDate, endDate)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, "Attendance summary fetched successfully", summary)
 }

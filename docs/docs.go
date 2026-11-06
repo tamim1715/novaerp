@@ -2175,6 +2175,119 @@ const docTemplate = `{
                 }
             }
         },
+        "/hr/allowances/assign": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allocate fixed or percentage allowance to an employee",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Allowance"
+                ],
+                "summary": "Assign allowance to employee",
+                "parameters": [
+                    {
+                        "description": "Allowance assignment payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/allowance.AssignAllowanceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/allowances/types": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve allowance types with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Allowance"
+                ],
+                "summary": "List allowance types",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Configure an allowance type (e.g. HRA, Medical) with fixed amount or percentage of basic",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Allowance"
+                ],
+                "summary": "Create an allowance type",
+                "parameters": [
+                    {
+                        "description": "Allowance type payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/allowance.CreateAllowanceTypeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/hr/attendances": {
             "get": {
                 "security": [
@@ -2271,6 +2384,51 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/attendance.CheckOutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/attendances/process": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Evaluates clock-ins against shifts, marks absents and leaves automatically",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Run daily attendance process",
+                "parameters": [
+                    {
+                        "description": "Process payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attendance.ProcessDailyAttendanceRequest"
                         }
                     }
                 ],
@@ -2467,6 +2625,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/hr/overtimes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve overtime policies with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Overtime"
+                ],
+                "summary": "List overtime policies",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Configure overtime thresholds, daily maximums, and rate multipliers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Overtime"
+                ],
+                "summary": "Create an overtime policy",
+                "parameters": [
+                    {
+                        "description": "Overtime policy payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/overtime.CreateOvertimePolicyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/hr/payrolls": {
             "post": {
                 "security": [
@@ -2591,6 +2817,119 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/shifts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve work shifts with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shift"
+                ],
+                "summary": "List work shifts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Configure a work shift with start/end time, grace period, and work hours",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shift"
+                ],
+                "summary": "Create a work shift configuration",
+                "parameters": [
+                    {
+                        "description": "Shift configuration payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shift.CreateShiftRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/shifts/assign": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Assign work shift with effective dates to an employee",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shift"
+                ],
+                "summary": "Assign a shift to an employee",
+                "parameters": [
+                    {
+                        "description": "Shift assignment payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shift.AssignShiftRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/response.APIResponse"
                         }
@@ -3610,6 +3949,64 @@ const docTemplate = `{
                 }
             }
         },
+        "allowance.AssignAllowanceRequest": {
+            "type": "object",
+            "required": [
+                "allowanceTypeId",
+                "employeeId"
+            ],
+            "properties": {
+                "allowanceTypeId": {
+                    "type": "string",
+                    "example": "5e53303c-8ab5-46eb-a1f9-9ea2eb60b37f"
+                },
+                "amount": {
+                    "description": "Specific override amount; if 0, type default is used",
+                    "type": "number",
+                    "example": 500
+                },
+                "employeeId": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                }
+            }
+        },
+        "allowance.CreateAllowanceTypeRequest": {
+            "type": "object",
+            "required": [
+                "calculationType",
+                "code",
+                "name"
+            ],
+            "properties": {
+                "calculationType": {
+                    "description": "FIXED or PERCENTAGE",
+                    "type": "string",
+                    "example": "PERCENTAGE"
+                },
+                "code": {
+                    "type": "string",
+                    "example": "HRA"
+                },
+                "defaultAmount": {
+                    "description": "40% if PERCENTAGE, or flat amount if FIXED",
+                    "type": "number",
+                    "example": 40
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Monthly housing allowance"
+                },
+                "isTaxable": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "name": {
+                    "type": "string",
+                    "example": "House Rent Allowance"
+                }
+            }
+        },
         "attendance.CheckInRequest": {
             "type": "object",
             "required": [
@@ -3639,6 +4036,22 @@ const docTemplate = `{
                 "notes": {
                     "type": "string",
                     "example": "Completed shift"
+                }
+            }
+        },
+        "attendance.ProcessDailyAttendanceRequest": {
+            "type": "object",
+            "required": [
+                "date"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "2026-08-06"
+                },
+                "departmentId": {
+                    "type": "string",
+                    "example": "d290f1ee-6c54-4b01-90e6-d701748f0851"
                 }
             }
         },
@@ -4101,6 +4514,51 @@ const docTemplate = `{
                 }
             }
         },
+        "overtime.CreateOvertimePolicyRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "OT_STD"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Standard corporate OT policy"
+                },
+                "holidayRateMultiplier": {
+                    "type": "number",
+                    "example": 2
+                },
+                "isDefault": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "maxOvertimeHoursPerDay": {
+                    "type": "number",
+                    "example": 4
+                },
+                "minOvertimeMinutes": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Standard Overtime Policy"
+                },
+                "weekdayRateMultiplier": {
+                    "type": "number",
+                    "example": 1.5
+                },
+                "weekendRateMultiplier": {
+                    "type": "number",
+                    "example": 2
+                }
+            }
+        },
         "pagination.PageResponse": {
             "type": "object",
             "properties": {
@@ -4143,9 +4601,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "allowancesDefault": {
-                    "description": "Standard bonus/allowance per employee",
+                    "description": "Fallback allowance if none configured",
                     "type": "number",
-                    "example": 200
+                    "example": 0
+                },
+                "considerAttendance": {
+                    "description": "Calculate salary from attendance, overtime \u0026 leaves",
+                    "type": "boolean",
+                    "example": true
                 },
                 "deductionsDefault": {
                     "description": "Standard tax/insurance deduction per employee",
@@ -4584,6 +5047,79 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "shift.AssignShiftRequest": {
+            "type": "object",
+            "required": [
+                "effectiveFrom",
+                "employeeId",
+                "shiftId"
+            ],
+            "properties": {
+                "effectiveFrom": {
+                    "type": "string",
+                    "example": "2026-08-01"
+                },
+                "effectiveTo": {
+                    "type": "string",
+                    "example": "2026-12-31"
+                },
+                "employeeId": {
+                    "type": "string",
+                    "example": "3f393bbd-9790-4045-853e-26a2c732ee06"
+                },
+                "shiftId": {
+                    "type": "string",
+                    "example": "5e53303c-8ab5-46eb-a1f9-9ea2eb60b37f"
+                }
+            }
+        },
+        "shift.CreateShiftRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "endTime",
+                "name",
+                "startTime"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "GEN_MORN"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Default corporate morning shift"
+                },
+                "endTime": {
+                    "type": "string",
+                    "example": "17:00"
+                },
+                "gracePeriodMinutes": {
+                    "type": "integer",
+                    "example": 15
+                },
+                "halfDayHours": {
+                    "type": "number",
+                    "example": 4
+                },
+                "isNightShift": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "name": {
+                    "type": "string",
+                    "example": "General Morning Shift"
+                },
+                "startTime": {
+                    "type": "string",
+                    "example": "09:00"
+                },
+                "workHours": {
+                    "type": "number",
+                    "example": 8
                 }
             }
         },

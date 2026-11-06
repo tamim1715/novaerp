@@ -43,3 +43,16 @@ func _() {}
 // @Success 200 {object} response.APIResponse
 // @Router /hr/attendances [get]
 func _() {}
+
+// ProcessDaily godoc
+// @Summary Run daily attendance process
+// @Description Evaluates clock-ins against shifts, marks absents and leaves automatically
+// @Tags Attendance
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body ProcessDailyAttendanceRequest true "Process payload"
+// @Success 200 {object} response.APIResponse
+// @Failure 400 {object} response.APIResponse
+// @Router /hr/attendances/process [post]
+func _() {}

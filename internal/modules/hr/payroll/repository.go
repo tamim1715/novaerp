@@ -19,6 +19,7 @@ type Repository interface {
 	FindPayslipsByPeriodID(ctx context.Context, periodID string) ([]Payslip, error)
 	FindPayslipByID(ctx context.Context, id string) (*Payslip, error)
 	UpdatePayslip(ctx context.Context, payslip *Payslip) error
+	DeletePayslipsByPeriodID(ctx context.Context, periodID string) error
 }
 
 type repository struct {
@@ -110,4 +111,12 @@ func (r *repository) FindPayslipByID(ctx context.Context, id string) (*Payslip, 
 
 func (r *repository) UpdatePayslip(ctx context.Context, payslip *Payslip) error {
 	return r.db.WithContext(ctx).Save(payslip).Error
+}
+
+func (r *repository) DeletePayslipsByPeriodID(ctx context.Context, periodID string) error {
+	uid, err := uuid.Parse(periodID)
+	if err != nil {
+		return gorm.ErrRecordNotFound
+	}
+	return r.db.WithContext(ctx).Where("payroll_period_id = ?", uid).Delete(&Payslip{}).Error
 }

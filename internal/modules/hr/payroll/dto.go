@@ -6,8 +6,9 @@ type CreatePayrollPeriodRequest struct {
 }
 
 type ProcessPayrollRequest struct {
-	AllowancesDefault float64 `json:"allowancesDefault" example:"200.00"` // Standard bonus/allowance per employee
-	DeductionsDefault float64 `json:"deductionsDefault" example:"50.00"`  // Standard tax/insurance deduction per employee
+	AllowancesDefault  float64 `json:"allowancesDefault" example:"0.00"`  // Fallback allowance if none configured
+	DeductionsDefault  float64 `json:"deductionsDefault" example:"50.00"` // Standard tax/insurance deduction per employee
+	ConsiderAttendance *bool   `json:"considerAttendance" example:"true"` // Calculate salary from attendance, overtime & leaves
 }
 
 type PayrollPeriodResponse struct {
@@ -24,19 +25,26 @@ type PayrollPeriodResponse struct {
 }
 
 type PayslipResponse struct {
-	ID                  string  `json:"id"`
-	PayrollPeriodID     string  `json:"payrollPeriodId"`
-	EmployeeID          string  `json:"employeeId"`
-	EmployeeName        string  `json:"employeeName,omitempty"`
-	EmployeeDesignation string  `json:"employeeDesignation,omitempty"`
-	BasicSalary         float64 `json:"basicSalary"`
-	Allowances          float64 `json:"allowances"`
-	Deductions          float64 `json:"deductions"`
+	ID                   string  `json:"id"`
+	PayrollPeriodID      string  `json:"payrollPeriodId"`
+	EmployeeID           string  `json:"employeeId"`
+	EmployeeName         string  `json:"employeeName,omitempty"`
+	EmployeeDesignation  string  `json:"employeeDesignation,omitempty"`
+	BasicSalary          float64 `json:"basicSalary"`
+	Allowances           float64 `json:"allowances"`
+	OvertimeHours        float64 `json:"overtimeHours"`
+	OvertimePay          float64 `json:"overtimePay"`
+	Deductions           float64 `json:"deductions"`
+	AbsentDays           int     `json:"absentDays"`
+	AbsentDeduction      float64 `json:"absentDeduction"`
+	UnpaidLeaveDays      int     `json:"unpaidLeaveDays"`
 	UnpaidLeaveDeduction float64 `json:"unpaidLeaveDeduction"`
-	GrossSalary         float64 `json:"grossSalary"`
-	NetSalary           float64 `json:"netSalary"`
-	Status              string  `json:"status"`
-	PaymentDate         string  `json:"paymentDate,omitempty"`
-	Notes               string  `json:"notes,omitempty"`
-	CreatedAt           int64   `json:"createdAt"`
+	PresentDays          int     `json:"presentDays"`
+	WorkingDays          int     `json:"workingDays"`
+	GrossSalary          float64 `json:"grossSalary"`
+	NetSalary            float64 `json:"netSalary"`
+	Status               string  `json:"status"`
+	PaymentDate          string  `json:"paymentDate,omitempty"`
+	Notes                string  `json:"notes,omitempty"`
+	CreatedAt            int64   `json:"createdAt"`
 }

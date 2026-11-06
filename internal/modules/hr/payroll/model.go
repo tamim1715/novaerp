@@ -42,8 +42,15 @@ type Payslip struct {
 	EmployeeID           uuid.UUID    `gorm:"type:uuid;not null;index" json:"employeeId"`
 	BasicSalary          float64      `gorm:"type:numeric(12,2);not null" json:"basicSalary"`
 	Allowances           float64      `gorm:"type:numeric(12,2);default:0" json:"allowances"`
+	OvertimeHours        float64      `gorm:"type:numeric(5,2);default:0" json:"overtimeHours"`
+	OvertimePay          float64      `gorm:"type:numeric(12,2);default:0" json:"overtimePay"`
 	Deductions           float64      `gorm:"type:numeric(12,2);default:0" json:"deductions"`
+	AbsentDays           int          `gorm:"default:0" json:"absentDays"`
+	AbsentDeduction      float64      `gorm:"type:numeric(12,2);default:0" json:"absentDeduction"`
+	UnpaidLeaveDays      int          `gorm:"default:0" json:"unpaidLeaveDays"`
 	UnpaidLeaveDeduction float64      `gorm:"type:numeric(12,2);default:0" json:"unpaidLeaveDeduction"`
+	PresentDays          int          `gorm:"default:0" json:"presentDays"`
+	WorkingDays          int          `gorm:"default:0" json:"workingDays"`
 	GrossSalary          float64      `gorm:"type:numeric(12,2);not null" json:"grossSalary"`
 	NetSalary            float64      `gorm:"type:numeric(12,2);not null" json:"netSalary"`
 	Status               enums.Status `gorm:"size:20;default:'DRAFT'" json:"status"` // DRAFT, PAID

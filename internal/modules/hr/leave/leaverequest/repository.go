@@ -2,6 +2,7 @@ package leaverequest
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/tamim1715/novaerp/internal/common/pagination"
@@ -12,6 +13,8 @@ type Repository interface {
 	Create(ctx context.Context, lr *LeaveRequest) error
 	FindAll(ctx context.Context, req pagination.PageRequest) ([]LeaveRequest, int64, error)
 	FindByID(ctx context.Context, id string) (*LeaveRequest, error)
+	FindApprovedByEmployeeAndDate(ctx context.Context, employeeID uuid.UUID, date time.Time) (*LeaveRequest, error)
+	FindApprovedByEmployeeAndDateRange(ctx context.Context, employeeID uuid.UUID, startDate, endDate time.Time) ([]LeaveRequest, error)
 	Update(ctx context.Context, lr *LeaveRequest) error
 }
 
@@ -67,6 +70,31 @@ func (r *repository) FindByID(ctx context.Context, id string) (*LeaveRequest, er
 		return nil, err
 	}
 	return &lr, nil
+}
+
+func (r *repository) FindApprovedByEmployeeAndDate(ctx context.Context, employeeID uuid.UUID, date time.Time) (*LeaveRequest, error) {
+	var lr LeaveRequest
+	targetDate := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	err := r.db.WithContext(ctx).
+		Preload("LeaveType").
+		Where("employee_id = ? AND status = ? AND start_date <= ? AND end_date >= ?", employeeID, StatusApproved, targetDate, targetDate).
+		First(&lr).Error
+	if err != nil {
+		return nil, err
+	}
+	return &lr, nil
+}
+
+func (r *repository) FindApprovedByEmployeeAndDateRange(ctx context.Context, employeeID uuid.UUID, startDate, endDate time.Time) ([]LeaveRequest, error) {
+	var list []LeaveRequest
+	start := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
+	end := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 0, 0, 0, 0, time.UTC)
+	err := r.db.WithContext(ctx).
+		Preload("LeaveType").
+		Where("employee_id = ? AND status = ? AND ((start_date BETWEEN ? AND ?) OR (end_date BETWEEN ? AND ?) OR (start_date <= ? AND end_date >= ?))",
+			employeeID, StatusApproved, start, end, start, end, start, end).
+		Find(&list).Error
+	return list, err
 }
 
 func (r *repository) Update(ctx context.Context, lr *LeaveRequest) error {

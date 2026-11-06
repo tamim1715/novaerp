@@ -16,10 +16,13 @@ import (
 	"github.com/tamim1715/novaerp/internal/modules/auth"
 	"github.com/tamim1715/novaerp/internal/modules/department"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
+	"github.com/tamim1715/novaerp/internal/modules/hr/allowance"
 	"github.com/tamim1715/novaerp/internal/modules/hr/attendance"
 	"github.com/tamim1715/novaerp/internal/modules/hr/leave/leaverequest"
 	"github.com/tamim1715/novaerp/internal/modules/hr/leave/leavetype"
+	"github.com/tamim1715/novaerp/internal/modules/hr/overtime"
 	"github.com/tamim1715/novaerp/internal/modules/hr/payroll"
+	"github.com/tamim1715/novaerp/internal/modules/hr/shift"
 	"github.com/tamim1715/novaerp/internal/modules/inventory/product"
 	"github.com/tamim1715/novaerp/internal/modules/inventory/stock"
 	"github.com/tamim1715/novaerp/internal/modules/inventory/warehouse"
@@ -73,6 +76,11 @@ func Bootstrap() (*gin.Engine, *app.Application, error) {
 		&leavetype.LeaveType{},
 		&leaverequest.LeaveRequest{},
 		&attendance.Attendance{},
+		&shift.Shift{},
+		&shift.EmployeeShift{},
+		&overtime.OvertimePolicy{},
+		&allowance.AllowanceType{},
+		&allowance.EmployeeAllowance{},
 		&payroll.PayrollPeriod{},
 		&payroll.Payslip{},
 		&account.Account{},

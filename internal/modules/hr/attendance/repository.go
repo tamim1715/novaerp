@@ -14,6 +14,7 @@ type Repository interface {
 	FindAll(ctx context.Context, req pagination.PageRequest) ([]Attendance, int64, error)
 	FindByID(ctx context.Context, id string) (*Attendance, error)
 	FindByEmployeeAndDate(ctx context.Context, employeeID uuid.UUID, date time.Time) (*Attendance, error)
+	FindByEmployeeAndDateRange(ctx context.Context, employeeID uuid.UUID, startDate, endDate time.Time) ([]Attendance, error)
 	Update(ctx context.Context, att *Attendance) error
 }
 
@@ -34,7 +35,7 @@ func (r *repository) FindAll(ctx context.Context, req pagination.PageRequest) ([
 	var total int64
 
 	req.Normalize()
-	db := r.db.WithContext(ctx).Model(&Attendance{}).Preload("Employee")
+	db := r.db.WithContext(ctx).Model(&Attendance{}).Preload("Employee").Preload("Shift")
 
 	if req.Search != "" {
 		search := "%" + req.Search + "%"
@@ -59,7 +60,7 @@ func (r *repository) FindByID(ctx context.Context, id string) (*Attendance, erro
 		return nil, gorm.ErrRecordNotFound
 	}
 	var att Attendance
-	err = r.db.WithContext(ctx).Preload("Employee").First(&att, "id = ?", uid).Error
+	err = r.db.WithContext(ctx).Preload("Employee").Preload("Shift").First(&att, "id = ?", uid).Error
 	if err != nil {
 		return nil, err
 	}
@@ -69,11 +70,24 @@ func (r *repository) FindByID(ctx context.Context, id string) (*Attendance, erro
 func (r *repository) FindByEmployeeAndDate(ctx context.Context, employeeID uuid.UUID, date time.Time) (*Attendance, error) {
 	var att Attendance
 	dateOnly := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
-	err := r.db.WithContext(ctx).Preload("Employee").First(&att, "employee_id = ? AND date = ?", employeeID, dateOnly).Error
+	err := r.db.WithContext(ctx).Preload("Employee").Preload("Shift").First(&att, "employee_id = ? AND date = ?", employeeID, dateOnly).Error
 	if err != nil {
 		return nil, err
 	}
 	return &att, nil
+}
+
+func (r *repository) FindByEmployeeAndDateRange(ctx context.Context, employeeID uuid.UUID, startDate, endDate time.Time) ([]Attendance, error) {
+	var list []Attendance
+	start := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
+	end := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 0, 0, 0, 0, time.UTC)
+
+	err := r.db.WithContext(ctx).Preload("Employee").Preload("Shift").
+		Where("employee_id = ? AND date >= ? AND date <= ?", employeeID, start, end).
+		Order("date ASC").
+		Find(&list).Error
+
+	return list, err
 }
 
 func (r *repository) Update(ctx context.Context, att *Attendance) error {

@@ -29,6 +29,8 @@ const (
 	StatusAbsent  AttendanceStatus = "ABSENT"
 	StatusLate    AttendanceStatus = "LATE"
 	StatusHalfDay AttendanceStatus = "HALF_DAY"
+	StatusHoliday AttendanceStatus = "HOLIDAY"
+	StatusWeekend AttendanceStatus = "WEEKEND"
 
 	// Leave Request Statuses
 	StatusPending   LeaveStatus = "PENDING"
@@ -68,6 +70,8 @@ func ValidAttendanceStatuses() []Status {
 		StatusLate,
 		StatusHalfDay,
 		StatusOnLeave,
+		StatusHoliday,
+		StatusWeekend,
 	}
 }
 

@@ -4,10 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/tamim1715/novaerp/internal/common/pagination"
 	"github.com/tamim1715/novaerp/internal/modules/employee"
+	"github.com/tamim1715/novaerp/internal/modules/hr/allowance"
+	"github.com/tamim1715/novaerp/internal/modules/hr/attendance"
+	"github.com/tamim1715/novaerp/internal/modules/hr/leave/leaverequest"
+	"github.com/tamim1715/novaerp/internal/modules/hr/overtime"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -22,16 +27,32 @@ type Service interface {
 }
 
 type service struct {
-	repo         Repository
-	employeeRepo employee.Repository
-	logger       *zap.Logger
+	repo              Repository
+	employeeRepo      employee.Repository
+	allowanceService  allowance.Service
+	attendanceService attendance.Service
+	overtimeService   overtime.Service
+	leaveRequestRepo  leaverequest.Repository
+	logger            *zap.Logger
 }
 
-func NewService(repo Repository, employeeRepo employee.Repository, logger *zap.Logger) Service {
+func NewService(
+	repo Repository,
+	employeeRepo employee.Repository,
+	allowanceService allowance.Service,
+	attendanceService attendance.Service,
+	overtimeService overtime.Service,
+	leaveRequestRepo leaverequest.Repository,
+	logger *zap.Logger,
+) Service {
 	return &service{
-		repo:         repo,
-		employeeRepo: employeeRepo,
-		logger:       logger,
+		repo:              repo,
+		employeeRepo:      employeeRepo,
+		allowanceService:  allowanceService,
+		attendanceService: attendanceService,
+		overtimeService:   overtimeService,
+		leaveRequestRepo:  leaveRequestRepo,
+		logger:            logger,
 	}
 }
 
@@ -74,7 +95,7 @@ func (s *service) ProcessPayroll(ctx context.Context, periodID string, req Proce
 	}
 
 	// Fetch active employees
-	pageReq := pagination.PageRequest{Page: 1, Size: 100}
+	pageReq := pagination.PageRequest{Page: 1, Size: 1000}
 	employees, _, err := s.employeeRepo.FindAll(ctx, pageReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch employees for payroll: %w", err)
@@ -84,29 +105,114 @@ func (s *service) ProcessPayroll(ctx context.Context, periodID string, req Proce
 		return nil, errors.New("no active employees found to generate payslips")
 	}
 
+	// Fetch default overtime policy
+	otPolicy, _ := s.overtimeService.GetDefaultPolicy(ctx)
+	otMultiplier := 1.5
+	if otPolicy != nil && otPolicy.WeekdayRateMultiplier > 0 {
+		otMultiplier = otPolicy.WeekdayRateMultiplier
+	}
+
+	considerAttendance := true
+	if req.ConsiderAttendance != nil {
+		considerAttendance = *req.ConsiderAttendance
+	}
+
 	var payslips []Payslip
 	var totalGross float64
 	var totalNet float64
 
 	for _, emp := range employees {
 		basic := emp.Salary
-		allowances := req.AllowancesDefault
-		deductions := req.DeductionsDefault
-		unpaidDeduction := 0.0 // Reserved for unpaid leave integration
 
-		gross := basic + allowances
-		net := gross - deductions - unpaidDeduction
+		// Calculate Allowances
+		allowancesTotal, items, err := s.allowanceService.CalculateEmployeeAllowances(ctx, emp.ID, basic)
+		if err != nil || (len(items) == 0 && req.AllowancesDefault > 0) {
+			allowancesTotal = req.AllowancesDefault
+		}
+
+		otHours := 0.0
+		otPay := 0.0
+		absentDays := 0
+		absentDeduction := 0.0
+		unpaidLeaveDays := 0
+		unpaidDeduction := 0.0
+		presentDays := 0
+		workingDays := 22
+
+		if considerAttendance {
+			// Query monthly attendance summary
+			summary, err := s.attendanceService.GetMonthlySummary(ctx, emp.ID, period.StartDate, period.EndDate)
+			if err == nil && summary != nil {
+				if summary.TotalWorkingDays > 0 {
+					workingDays = summary.TotalWorkingDays
+				}
+				presentDays = summary.PresentDays
+				absentDays = summary.AbsentDays
+				otHours = summary.TotalOvertimeHours
+			}
+
+			dailyRate := basic / float64(workingDays)
+			hourlyRate := dailyRate / 8.0
+
+			// Overtime Pay
+			if otHours > 0 {
+				otPay = math.Round(otHours*hourlyRate*otMultiplier*100) / 100
+			}
+
+			// Absent Deduction
+			if absentDays > 0 {
+				absentDeduction = math.Round(float64(absentDays)*dailyRate*100) / 100
+			}
+
+			// Unpaid Leave Deduction
+			approvedLeaves, err := s.leaveRequestRepo.FindApprovedByEmployeeAndDateRange(ctx, emp.ID, period.StartDate, period.EndDate)
+			if err == nil {
+				for _, lr := range approvedLeaves {
+					if lr.LeaveType.ID != [16]byte{} && !lr.LeaveType.IsPaid {
+						// Count days within the period
+						reqStart := lr.StartDate
+						if reqStart.Before(period.StartDate) {
+							reqStart = period.StartDate
+						}
+						reqEnd := lr.EndDate
+						if reqEnd.After(period.EndDate) {
+							reqEnd = period.EndDate
+						}
+						days := int(reqEnd.Sub(reqStart).Hours()/24) + 1
+						if days > 0 {
+							unpaidLeaveDays += days
+						}
+					}
+				}
+				if unpaidLeaveDays > 0 {
+					unpaidDeduction = math.Round(float64(unpaidLeaveDays)*dailyRate*100) / 100
+				}
+			}
+		}
+
+		otherDeductions := req.DeductionsDefault
+		gross := math.Round((basic+allowancesTotal+otPay)*100) / 100
+		totalDeductions := math.Round((otherDeductions+absentDeduction+unpaidDeduction)*100) / 100
+		net := gross - totalDeductions
 		if net < 0 {
 			net = 0
 		}
+		net = math.Round(net*100) / 100
 
 		payslips = append(payslips, Payslip{
 			PayrollPeriodID:      period.ID,
 			EmployeeID:           emp.ID,
 			BasicSalary:          basic,
-			Allowances:           allowances,
-			Deductions:           deductions,
+			Allowances:           allowancesTotal,
+			OvertimeHours:        otHours,
+			OvertimePay:          otPay,
+			Deductions:           otherDeductions,
+			AbsentDays:           absentDays,
+			AbsentDeduction:      absentDeduction,
+			UnpaidLeaveDays:      unpaidLeaveDays,
 			UnpaidLeaveDeduction: unpaidDeduction,
+			PresentDays:          presentDays,
+			WorkingDays:          workingDays,
 			GrossSalary:          gross,
 			NetSalary:            net,
 			Status:               StatusDraft,
@@ -116,15 +222,18 @@ func (s *service) ProcessPayroll(ctx context.Context, periodID string, req Proce
 		totalNet += net
 	}
 
-	// Save payslips
+	// Remove old payslips for this period if re-processing
+	_ = s.repo.DeletePayslipsByPeriodID(ctx, periodID)
+
+	// Save generated payslips
 	if err := s.repo.CreatePayslips(ctx, payslips); err != nil {
 		return nil, fmt.Errorf("failed to generate payslips: %w", err)
 	}
 
 	now := time.Now()
 	period.Status = StatusProcessing
-	period.TotalGross = totalGross
-	period.TotalNet = totalNet
+	period.TotalGross = math.Round(totalGross*100) / 100
+	period.TotalNet = math.Round(totalNet*100) / 100
 	period.ProcessedAt = &now
 
 	if err := s.repo.UpdatePeriod(ctx, period); err != nil {

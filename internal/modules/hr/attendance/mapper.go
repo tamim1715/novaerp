@@ -7,9 +7,17 @@ func ToAttendanceResponse(a *Attendance) AttendanceResponse {
 		Date:          a.Date.Format("2006-01-02"),
 		WorkHours:     a.WorkHours,
 		OvertimeHours: a.OvertimeHours,
+		LateMinutes:   a.LateMinutes,
 		Status:        a.Status.String(),
 		Notes:         a.Notes,
 		CreatedAt:     a.CreatedAt.Unix(),
+	}
+
+	if a.ShiftID != nil {
+		resp.ShiftID = a.ShiftID.String()
+	}
+	if a.Shift != nil {
+		resp.ShiftName = a.Shift.Name
 	}
 
 	if a.CheckIn != nil {

@@ -7,5 +7,7 @@ func RegisterRoutes(router *gin.RouterGroup, handler *Handler) {
 	router.POST("/check-out", handler.CheckOut)
 	router.POST("", handler.Create)
 	router.GET("", handler.FindAll)
+	router.POST("/process", handler.ProcessDaily)
+	router.GET("/summary", handler.GetSummary)
 	router.GET("/:id", handler.FindByID)
 }
